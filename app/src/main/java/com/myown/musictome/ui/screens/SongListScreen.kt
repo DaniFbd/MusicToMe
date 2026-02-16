@@ -36,6 +36,9 @@ fun SongListScreen(
     val isLoading by viewModel.isLoading
     val currentSong by viewModel.currentSong
     val isPlaying by viewModel.isPlaying
+    val position by viewModel.currentPosition
+    val duration by viewModel.totalDuration
+    val progress = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -74,7 +77,10 @@ fun SongListScreen(
             currentSong?.let { song ->
                 BottomPlayerBar(
                     song = song,
+                    progress = progress,
                     isPlaying = isPlaying,
+                    onNext = {viewModel.next()},
+                    onPrevious = {viewModel.previous()},
                     onTogglePlay = { viewModel.togglePlayPause() },
                     onClick = { /* Aquí podrías abrir una pantalla completa más adelante */ }
                 )

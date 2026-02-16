@@ -11,6 +11,7 @@ import com.myown.musictome.player.MusicPlayerHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -35,6 +36,26 @@ class MusicViewModel @Inject constructor(
     private val _isPlaying = mutableStateOf(false)
     val isPlaying: State<Boolean> = _isPlaying
 
+    private val _isShuffleEnabled = mutableStateOf(false)
+    val isShuffleEnabled: State<Boolean> = _isShuffleEnabled
+
+    private val _isRepeatAllEnabled = mutableStateOf(false)
+    val isRepeatAllEnabled: State<Boolean> = _isRepeatAllEnabled
+
+    private val _currentPosition = mutableStateOf(0L)
+    val currentPosition: State<Long> = _currentPosition
+
+    private val _totalDuration = mutableStateOf(0L)
+    val totalDuration: State<Long> = _totalDuration
+
+    init {
+        playerHandler.onMediaItemTransition = { index ->
+            _songs.value.getOrNull(index)?.let { song ->
+                _currentSong.value = song
+            }
+        }
+    }
+
     fun loadSongs() {
         viewModelScope.launch(ioDispatcher) {
             _isLoading.value = true
@@ -49,9 +70,23 @@ class MusicViewModel @Inject constructor(
     }
 
     fun onSongClick(song: Song) {
+        val index = songs.value.indexOf(song)
         _currentSong.value = song
         _isPlaying.value = true
-        playerHandler.playSong(song)
+        playerHandler.setupPlaylist(songs.value, index)
+    }
+
+    fun next() { playerHandler.skipNext() }
+    fun previous() { playerHandler.skipPrevious() }
+
+    fun toggleShuffle() {
+        _isShuffleEnabled.value = !_isShuffleEnabled.value
+        playerHandler.setShuffleMode(_isShuffleEnabled.value)
+    }
+
+    fun toggleRepeat() {
+        _isRepeatAllEnabled.value = !_isRepeatAllEnabled.value
+        playerHandler.setRepeatMode(_isRepeatAllEnabled.value)
     }
 
     fun togglePlayPause() {
@@ -59,6 +94,16 @@ class MusicViewModel @Inject constructor(
             val newState = !_isPlaying.value
             _isPlaying.value = newState
             playerHandler.togglePlayPause(newState)
+        }
+    }
+
+    fun updateProgress() {
+        viewModelScope.launch {
+            while (isPlaying.value) {
+                _currentPosition.value = playerHandler.getCurrentPosition()
+                _totalDuration.value = playerHandler.getDuration()
+                delay(1000)
+            }
         }
     }
 }
