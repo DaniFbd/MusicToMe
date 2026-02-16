@@ -8,12 +8,14 @@ plugins {
 
 android {
     namespace = "com.myown.musictome"
-    compileSdk = 34
+    //noinspection GradleDependency
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.myown.musictome"
         minSdk = 24
-        targetSdk = 34
+        //noinspection OldTargetApi,EditedTargetSdkVersion
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -25,7 +27,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -59,8 +62,8 @@ android {
 
 dependencies {
     // BOM para Compose (controla versiones automáticamente)
-    implementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
+    implementation(platform("androidx.compose:compose-bom:2024.09.03"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.03"))
 
     // Compose Core
     implementation("androidx.compose.ui:ui")
@@ -72,51 +75,51 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     // Activity para Compose
-    val activityComposeVersion = "1.8.0"
+    val activityComposeVersion = "1.9.2"
     implementation("androidx.activity:activity-compose:$activityComposeVersion")
 
     // Lifecycle + ViewModel
-    val lifecycleVersion = "2.6.1"
+    val lifecycleVersion = "2.10.0"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
 
     // Hilt para ViewModel
-    val hiltComposeVersion = "1.1.0"
-    val hiltVersion = "2.48"
+    val hiltComposeVersion = "1.3.0"
+    val hiltVersion = "2.51.1"
     implementation("androidx.hilt:hilt-navigation-compose:$hiltComposeVersion")
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-compiler:$hiltVersion")
 
     // DocumentFile (para leer archivos)
-    val documentFile = "1.0.1"
+    val documentFile = "1.1.0"
     implementation("androidx.documentfile:documentfile:$documentFile")
 
     // Coil para imágenes
-    val coilVersion = "2.4.0"
+    val coilVersion = "2.7.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
 
     // System UI (barra de estado y navegación)
-    val systemUiVersion = "0.34.0"
+    val systemUiVersion = "0.36.0"
     implementation("com.google.accompanist:accompanist-systemuicontroller:$systemUiVersion")
 
     // Core KTX
-    val coreVersion = "1.10.1"
+    val coreVersion = "1.13.1"
     implementation("androidx.core:core-ktx:$coreVersion")
 
     //Coroutines
-    val coroutinesVersion = "1.6.0"
+    val coroutinesVersion = "1.10.2"
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
     // Media3 - El estándar moderno para audio en Android
-    val media3Version = "1.3.1"
+    val media3Version = "1.9.2"
     implementation("androidx.media3:media3-exoplayer:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
     implementation("androidx.media3:media3-ui:$media3Version")
 
     // Test
     val junitVersion = "4.13.2"
-    val androidTestVersion = "1.1.5"
-    val androidTestCore = "3.5.1"
+    val androidTestVersion = "1.3.0"
+    val androidTestCore = "3.7.0"
     testImplementation("junit:junit:$junitVersion")
     androidTestImplementation("androidx.test.ext:junit:$androidTestVersion")
     androidTestImplementation("androidx.test.espresso:espresso-core:$androidTestCore")
