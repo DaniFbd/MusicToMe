@@ -4,6 +4,11 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -17,22 +22,30 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.myown.musictome.ui.components.BottomPlayerBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SongListScreen() {
-    var hasPermission by remember { mutableStateOf(false) }
+fun SongListScreen(
+    viewModel: MusicViewModel = hiltViewModel()
+) {
+    val songs by viewModel.songs
+    val isLoading by viewModel.isLoading
+    val currentSong by viewModel.currentSong
+    val isPlaying by viewModel.isPlaying
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        hasPermission = isGranted
+        if (isGranted) {
+            viewModel.loadSongs()
+        }
     }
 
     LaunchedEffect(Unit) {
-        // En Android 13+ usamos READ_MEDIA_AUDIO, en el resto READ_EXTERNAL_STORAGE
         val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_AUDIO
         } else {
@@ -41,12 +54,6 @@ fun SongListScreen() {
         permissionLauncher.launch(permission)
     }
 
-    val dummySongs = listOf(
-        Song("1", "Starboy", "The Weeknd", "3:50"),
-        Song("2", "Blinding Lights", "The Weeknd", "3:22"),
-        Song("3", "Nightcall", "Kavinsky", "4:18"),
-        Song("4", "Save Your Tears", "The Weeknd", "4:08")
-    )
     Scaffold (
         topBar = {
             CenterAlignedTopAppBar(
@@ -62,13 +69,46 @@ fun SongListScreen() {
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
+        },
+        bottomBar = {
+            currentSong?.let { song ->
+                BottomPlayerBar(
+                    song = song,
+                    isPlaying = isPlaying,
+                    onTogglePlay = { viewModel.togglePlayPause() },
+                    onClick = { /* Aquí podrías abrir una pantalla completa más adelante */ }
+                )
+            }
         }
     ){ innerPadding ->
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center // Centrar
         ) {
-            items(dummySongs) { song ->
-                SongItem(song = song, onClick = { })
+            if (isLoading) {
+                // Este es el spinner de carga de Material 3
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Buscando tu música...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            } else if (songs.isEmpty()) {
+                // Caso por si no encuentra nada o no hay permiso
+                Text(text = "No se encontraron canciones.")
+            } else {
+                // La lista real
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(songs) { song ->
+                        SongItem(song = song, onClick = { viewModel.onSongClick(song) })
+                    }
+                }
             }
         }
     }
