@@ -18,6 +18,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOn
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.ShuffleOn
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.runtime.getValue
@@ -33,6 +37,8 @@ import com.myown.musictome.formatTime
 fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
     val song by viewModel.currentSong
     val isPlaying by viewModel.isPlaying
+    val isShuffle by viewModel.isShuffleEnabled
+    val isRepeat by viewModel.isRepeatAllEnabled
     val position by viewModel.currentPosition
     val duration by viewModel.totalDuration
 
@@ -45,14 +51,12 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Botón para bajar la pantalla (Cerrar)
         IconButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) {
             Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(32.dp))
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Carátula Grande
         AsyncImage(
             model = song?.imageUrl ?: "https://via.placeholder.com/300",
             contentDescription = null,
@@ -64,20 +68,17 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Título y Artista
         Text(text = song?.title ?: "Desconocido", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(text = song?.artist ?: "Artista", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Slider (Barra de progreso interactiva)
         Slider(
             value = sliderPosition,
             onValueChange = { viewModel.seekTo(it) },
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Tiempos (01:20 / 03:45)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = formatTime(position), style = MaterialTheme.typography.bodySmall)
             Text(text = formatTime(duration), style = MaterialTheme.typography.bodySmall)
@@ -85,18 +86,40 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Controles Principales (Prev - Play - Next)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { viewModel.previous() }) { Icon(Icons.Default.SkipPrevious, null, modifier = Modifier.size(48.dp)) }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
 
             FloatingActionButton(
-                onClick = { viewModel.togglePlayPause() },
+                onClick = { viewModel.toggleShuffle() },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, null)
+                Icon(if (isShuffle) Icons.Default.ShuffleOn else Icons.Default.Shuffle, null)
             }
 
-            IconButton(onClick = { viewModel.next() }) { Icon(Icons.Default.SkipNext, null, modifier = Modifier.size(48.dp)) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { viewModel.previous() }) { Icon(Icons.Default.SkipPrevious, null, modifier = Modifier.size(48.dp)) }
+
+                FloatingActionButton(
+                    onClick = { viewModel.togglePlayPause() },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, null)
+                }
+
+                IconButton(onClick = { viewModel.next() }) { Icon(Icons.Default.SkipNext, null, modifier = Modifier.size(48.dp)) }
+            }
+
+            FloatingActionButton(
+                onClick = { viewModel.toggleRepeat() },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(if (isRepeat) Icons.Default.RepeatOn else Icons.Default.Repeat, null)
+            }
         }
     }
 }

@@ -105,7 +105,7 @@ class MusicViewModel @Inject constructor(
                     withContext(mainDispatcher) {
                         val pos = playerHandler.getCurrentPosition()
                         val dur = playerHandler.getDuration()
-                        
+
                         _currentPosition.value = pos
                         _totalDuration.value = dur
                     }
