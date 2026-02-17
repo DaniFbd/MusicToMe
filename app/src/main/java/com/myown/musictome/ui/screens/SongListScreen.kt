@@ -22,6 +22,9 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -39,6 +42,8 @@ fun SongListScreen(
     val position by viewModel.currentPosition
     val duration by viewModel.totalDuration
     val progress = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -82,7 +87,7 @@ fun SongListScreen(
                     onNext = {viewModel.next()},
                     onPrevious = {viewModel.previous()},
                     onTogglePlay = { viewModel.togglePlayPause() },
-                    onClick = { /* Aquí podrías abrir una pantalla completa más adelante */ }
+                    onClick = { showBottomSheet = true }
                 )
             }
         }
@@ -115,6 +120,21 @@ fun SongListScreen(
                         SongItem(song = song, onClick = { viewModel.onSongClick(song) })
                     }
                 }
+            }
+        }
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.surface,
+                dragHandle = { BottomSheetDefaults.DragHandle() } // La rayita de arriba para deslizar
+            ) {
+                // Aquí metemos la pantalla que diseñamos antes
+                CurrentSongScreen(
+                    viewModel = viewModel,
+                    onBack = { showBottomSheet = false }
+                )
             }
         }
     }

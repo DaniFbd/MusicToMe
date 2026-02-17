@@ -69,4 +69,8 @@ class MusicPlayerHandler@Inject constructor(
     fun getDuration(): Long{
         return exoPlayer?.duration ?: 0L
     }
+
+    fun seekTo(pos: Long){
+       exoPlayer?.seekTo(pos)
+    }
 }

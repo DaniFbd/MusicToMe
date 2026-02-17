@@ -54,6 +54,7 @@ class MusicViewModel @Inject constructor(
                 _currentSong.value = song
             }
         }
+        updateProgress()
     }
 
     fun loadSongs() {
@@ -98,12 +99,25 @@ class MusicViewModel @Inject constructor(
     }
 
     fun updateProgress() {
-        viewModelScope.launch {
-            while (isPlaying.value) {
-                _currentPosition.value = playerHandler.getCurrentPosition()
-                _totalDuration.value = playerHandler.getDuration()
+        viewModelScope.launch (ioDispatcher){
+            while(true){
+                if (isPlaying.value) {
+                    withContext(mainDispatcher) {
+                        val pos = playerHandler.getCurrentPosition()
+                        val dur = playerHandler.getDuration()
+                        
+                        _currentPosition.value = pos
+                        _totalDuration.value = dur
+                    }
+                }
                 delay(1000)
             }
         }
+    }
+
+    fun seekTo(position: Float) {
+        val duration = totalDuration.value
+        val newPosition = (position * duration).toLong()
+        playerHandler.seekTo(newPosition)
     }
 }
