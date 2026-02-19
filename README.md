@@ -58,4 +58,10 @@ Notificacion de carga: En ocasiones aparece una notificacion con el mensaje "Car
 ## ⚖️ Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
+## 👨‍💻 Autor
+
+**Daniel Cano Nicolau** *Desarrollador Java especializado en aplicaciones Web | Explorando el ecosistema Android con Kotlin y Jetpack Compose.*
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/dani-cano-nicolau-a33256277/)
+
 Si encuentras un error que no esté en esta lista, por favor abre un Issue en este repositorio.
