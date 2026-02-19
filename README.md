@@ -57,3 +57,5 @@ Notificacion de carga: En ocasiones aparece una notificacion con el mensaje "Car
 
 ## ⚖️ Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+Si encuentras un error que no esté en esta lista, por favor abre un Issue en este repositorio.
