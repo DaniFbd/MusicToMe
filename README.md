@@ -49,11 +49,9 @@ Puntos Verificados en GrapheneOS
 
     Notificaciones de Media: Los controles en la pantalla de bloqueo y el panel de ajustes rápidos responden sin retardos (latencia mínima).
 
-5. ⚠️ Errores Conocidos (Known Issues)
+5. 🛠️ Estado del Proyecto y Próximos Pasos
+Puedes ver las tareas pendientes y los errores identificados en nuestra sección de [Issues](https://github.com/DaniFbd/MusicToMe/issues).
 
-Gestión de Audio Focus: El comportamiento de pausa automática al recibir llamadas o notificaciones de otras apps está en fase de pruebas y podría no ser consistente en todas las versiones de Android.
-DataStore: Solo guardamos la ultima cancion, no estamos guardando Shuffle ni Repeat, queda pendiente.
-Notificacion de carga: En ocasiones aparece una notificacion con el mensaje "Cargando..."  
 
 ## ⚖️ Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
