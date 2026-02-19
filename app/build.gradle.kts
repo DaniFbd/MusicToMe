@@ -115,6 +115,11 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
     implementation("androidx.media3:media3-ui:$media3Version")
+    implementation("androidx.media3:media3-common:$media3Version")
+
+    //datastore
+    val datastoreVersion = "1.1.1"
+    implementation("androidx.datastore:datastore-preferences:$datastoreVersion")
 
     // Test
     val junitVersion = "4.13.2"

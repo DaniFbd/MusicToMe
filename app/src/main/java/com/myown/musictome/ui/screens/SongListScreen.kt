@@ -10,14 +10,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.myown.musictome.model.Song
 import androidx.compose.ui.text.font.FontWeight
 import com.myown.musictome.ui.components.SongItem
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
@@ -46,20 +45,26 @@ fun SongListScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val audioGranted = permissions[Manifest.permission.READ_MEDIA_AUDIO] ?: false
+        val notificationGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+
+        if (audioGranted) {
             viewModel.loadSongs()
         }
     }
 
     LaunchedEffect(Unit) {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_AUDIO
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.READ_MEDIA_AUDIO,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
         } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
-        permissionLauncher.launch(permission)
+        permissionLauncher.launch(permissions)
     }
 
     Scaffold (
@@ -130,7 +135,6 @@ fun SongListScreen(
                 containerColor = MaterialTheme.colorScheme.surface,
                 dragHandle = { BottomSheetDefaults.DragHandle() } // La rayita de arriba para deslizar
             ) {
-                // Aquí metemos la pantalla que diseñamos antes
                 CurrentSongScreen(
                     viewModel = viewModel,
                     onBack = { showBottomSheet = false }
