@@ -68,12 +68,18 @@ class MusicViewModel @Inject constructor(
             combine(musicPrefs.lastSongId, songsFlow) { id, songs ->
                 Pair(id, songs)
             }.collect { (id, songs) ->
-                if (id != null && songs.isNotEmpty() && _currentSong.value == null) {
-                    val index = songs.indexOfFirst { it.id == id }
-                    if (index != -1) {
-                        _currentSong.value = songs[index]
-                        playerHandler.setupPlaylist(songs, index, playWhenReady = false)
+                if (songs.isEmpty()) return@collect
+
+                if (_currentSong.value == null) {
+                    val index = if (id != null) {
+                        val foundIndex = songs.indexOfFirst { it.id == id }
+                        if (foundIndex != -1) foundIndex else 0
+                    } else {
+                        //1º ejecucion de aplicacion
+                        0
                     }
+                    _currentSong.value = songs[index]
+                    playerHandler.setupPlaylist(songs, index, playWhenReady = false)
                 }
             }
         }

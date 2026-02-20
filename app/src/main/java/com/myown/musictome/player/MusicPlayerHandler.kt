@@ -3,7 +3,7 @@ package com.myown.musictome.player
 import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Context
-import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
@@ -36,8 +36,6 @@ class MusicPlayerHandler @Inject constructor(
         if (mediaController != null || isInitializing) return
         isInitializing = true
 
-        val serviceIntent = Intent(context, PlaybackService::class.java)
-        ContextCompat.startForegroundService(context, serviceIntent)
         val sessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
         val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
 
@@ -45,60 +43,75 @@ class MusicPlayerHandler @Inject constructor(
             val controller = controllerFuture.get()
             mediaController = controller
 
-            if (mediaController?.currentMediaItem != null) {
-                val index = mediaController!!.currentMediaItemIndex
-                onMediaItemTransition?.invoke(index)
-            }
+            setMediaItemTransition(controller)
 
-            controller.addListener(object : Player.Listener {
-                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                    val currentIndex = controller.currentMediaItemIndex
-                    onMediaItemTransition?.invoke(currentIndex)
-                }
-            })
-
-            // 2. Preparamos los MediaItems (tu lógica de mapeo está perfecta)
-            val mediaItems = songs.map { song ->
-                val artworkUri = if (!song.imageUrl.isNullOrEmpty() && song.imageUrl.startsWith("content://")) {
-                    song.imageUrl.toUri()
-                } else {
-                    null
-                }
-                val validatedTitle = song.title.ifBlank { "Título desconocido" }
-                val validatedArtist = song.artist.ifBlank { "Artista desconocido" }
-
-                val metadata = MediaMetadata.Builder()
-                    .setTitle(validatedTitle)
-                    .setArtist(validatedArtist)
-                    .setArtworkUri(artworkUri)
-                    .setDisplayTitle(validatedTitle)
-                    .setExtras(Bundle().apply { putString("media_id", song.id) })
-                    .build()
-
-                val uri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    song.id.toLong()
-                )
-
-                MediaItem.Builder()
-                    .setMediaId(song.id)
-                    .setUri(uri)
-                    .setMediaMetadata(metadata)
-                    .build()
-                MediaItem.Builder().setMediaMetadata(metadata).setUri(uri).build()
-            }
+            // 2. Preparamos los MediaItems
+            val mediaItems = createMediaItems(songs)
 
             // 3. ¡USAMOS EL CONTROLLER!
-            // Esto automáticamente activará la notificación con los metadatos correctos
-            mediaController?.let { controller ->
-                controller.setMediaItems(mediaItems)
-                controller.prepare()
-                controller.seekTo(startIndex, 0L)
-                if (playWhenReady) {
-                    controller.play()
-                }
-            }
+            initMediaController(controller, mediaItems, startIndex, playWhenReady)
         }, ContextCompat.getMainExecutor(context))
+    }
+
+    private fun initMediaController(controller: MediaController,
+                                    items: List<MediaItem>,
+                                    startIndex: Int,
+                                    playWhenReady: Boolean){
+        controller.let { controller ->
+            controller.setMediaItems(items)
+            controller.prepare()
+            controller.seekTo(startIndex, 0L)
+            if (playWhenReady) {
+                controller.play()
+            }
+        }
+    }
+
+    private fun createMediaItems(songs: List<Song>) : List<MediaItem>{
+        return songs.map { song ->
+            val validatedTitle = song.title.ifBlank { "Título desconocido" }
+            val validatedArtist = song.artist.ifBlank { "Artista desconocido" }
+
+            val metadata = MediaMetadata.Builder()
+                .setTitle(validatedTitle)
+                .setArtist(validatedArtist)
+                .setArtworkUri(getSongImgUri(song))
+                .setDisplayTitle(validatedTitle)
+                .setExtras(Bundle().apply { putString("media_id", song.id) })
+                .build()
+
+            val uri = ContentUris.withAppendedId(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                song.id.toLong()
+            )
+
+            MediaItem.Builder()
+                .setMediaId(song.id)
+                .setUri(uri)
+                .setMediaMetadata(metadata)
+                .build()
+        }
+    }
+
+    private fun getSongImgUri(song: Song): Uri? {
+        if (!song.imageUrl.isNullOrEmpty() && song.imageUrl.startsWith("content://")) {
+            return song.imageUrl.toUri()
+        }
+        return null
+    }
+
+    private fun setMediaItemTransition(controller: MediaController) {
+        if (mediaController?.currentMediaItem != null) {
+            val index = mediaController!!.currentMediaItemIndex
+            onMediaItemTransition?.invoke(index)
+        }
+
+        controller.addListener(object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                val currentIndex = controller.currentMediaItemIndex
+                onMediaItemTransition?.invoke(currentIndex)
+            }
+        })
     }
 
     fun releaseController() {
