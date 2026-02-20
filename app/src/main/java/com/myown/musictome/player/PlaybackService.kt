@@ -45,13 +45,6 @@ class PlaybackService : MediaSessionService() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
         notificationManager.createNotificationChannel(channel)
 
-        val notification = androidx.core.app.NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentTitle("MusicToMe")
-            .setContentText("Cargando...")
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
-            .build()
-
         val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
@@ -65,7 +58,6 @@ class PlaybackService : MediaSessionService() {
             .setSessionActivity(pendingIntent)
             .build()
 
-        startForeground(100, notification)
         player.addListener(object : androidx.media3.common.Player.Listener {
              override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                 mediaSession?.setCustomLayout(emptyList())
