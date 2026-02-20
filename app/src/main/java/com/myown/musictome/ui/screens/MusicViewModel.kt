@@ -56,7 +56,7 @@ class MusicViewModel @Inject constructor(
         playerHandler.setOnSongChangedListener { index ->
             _songs.value.getOrNull(index)?.let { song ->
                 _currentSong.value = song
-                viewModelScope.launch(ioDispatcher) {
+                viewModelScope.launch {
                     musicPrefs.saveLastSong(song.id)
                 }
             }
@@ -65,22 +65,37 @@ class MusicViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val songsFlow = snapshotFlow { _songs.value }
 
-            combine(musicPrefs.lastSongId, songsFlow) { id, songs ->
-                Pair(id, songs)
-            }.collect { (id, songs) ->
-                if (songs.isEmpty()) return@collect
+            combine(
+                musicPrefs.lastSongId,
+                musicPrefs.isShuffleEnabled,
+                musicPrefs.isRepeatEnabled,
+                songsFlow) { id,shuffle,repeat, songs ->
+                InitialState(id,shuffle,repeat, songs)
+            }.collect { state ->
+                if (state.songs.isEmpty()) return@collect
 
                 if (_currentSong.value == null) {
-                    val index = if (id != null) {
-                        val foundIndex = songs.indexOfFirst { it.id == id }
+                    val index = if (state.id != null) {
+                        val foundIndex = state.songs.indexOfFirst { it.id == state.id }
                         if (foundIndex != -1) foundIndex else 0
                     } else {
                         //1º ejecucion de aplicacion
                         0
                     }
-                    _currentSong.value = songs[index]
-                    playerHandler.setupPlaylist(songs, index, playWhenReady = false)
+                    _currentSong.value = state.songs[index]
+                    playerHandler.setupPlaylist(state.songs, index, playWhenReady = false,state.shuffle, state.repeat)
                 }
+            }
+        }
+        viewModelScope.launch {
+            playerHandler.shuffleEnabled.collect { valorReal ->
+                _isShuffleEnabled.value = valorReal
+            }
+        }
+
+        viewModelScope.launch {
+            playerHandler.repeatEnabled.collect { valorReal ->
+                _isRepeatAllEnabled.value = valorReal
             }
         }
     }
@@ -101,7 +116,7 @@ class MusicViewModel @Inject constructor(
     fun onSongClick(song: Song) {
         _currentSong.value = song
         _isPlaying.value = true
-        viewModelScope.launch(ioDispatcher) {
+        viewModelScope.launch {
             musicPrefs.saveLastSong(song.id)
         }
         playerHandler.selectAndPlay(songs.value.indexOf(song))
@@ -111,13 +126,11 @@ class MusicViewModel @Inject constructor(
     fun previous() { playerHandler.skipPrevious() }
 
     fun toggleShuffle() {
-        _isShuffleEnabled.value = !_isShuffleEnabled.value
-        playerHandler.setShuffleMode(_isShuffleEnabled.value)
+        playerHandler.setShuffleMode(!_isShuffleEnabled.value)
     }
 
     fun toggleRepeat() {
-        _isRepeatAllEnabled.value = !_isRepeatAllEnabled.value
-        playerHandler.setRepeatMode(_isRepeatAllEnabled.value)
+        playerHandler.setRepeatMode(!_isRepeatAllEnabled.value)
     }
 
     fun togglePlayPause() {
@@ -149,5 +162,12 @@ class MusicViewModel @Inject constructor(
         val duration = totalDuration.value
         val newPosition = (position * duration).toLong()
         playerHandler.seekTo(newPosition)
+    }
+
+    private class InitialState(id1: String?, shuffle1: Boolean, repeat1: Boolean, songs1: List<Song>) {
+        var songs: List<Song> = songs1
+        var shuffle: Boolean = shuffle1
+        var repeat: Boolean = repeat1
+        var id: String? = id1
     }
 }

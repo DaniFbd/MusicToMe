@@ -18,13 +18,28 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.core.net.toUri
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.myown.musictome.data.MusicPreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @Singleton
 class MusicPlayerHandler @Inject constructor(
     @ApplicationContext private val context: Context,
     private val exoPlayer: ExoPlayer,
+    private val musicPrefs: MusicPreferences
 ) {
+    private val scope= CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val _shuffleEnabled = MutableStateFlow(false)
+    val shuffleEnabled = _shuffleEnabled.asStateFlow()
+
+    private val _repeatEnabled = MutableStateFlow(false)
+    val repeatEnabled = _repeatEnabled.asStateFlow()
+
     private var mediaController: MediaController? = null
     var onMediaItemTransition: ((Int) -> Unit)? = null
     private var isInitializing = false
@@ -33,7 +48,7 @@ class MusicPlayerHandler @Inject constructor(
         this.onMediaItemTransition = callback
     }
 
-    fun setupPlaylist(songs: List<Song>, startIndex: Int, playWhenReady: Boolean = true) {
+    fun setupPlaylist(songs: List<Song>, startIndex: Int, playWhenReady: Boolean = true, initialShuffle: Boolean, initialRepeat: Boolean) {
         if (mediaController != null || isInitializing) return
         isInitializing = true
 
@@ -51,7 +66,7 @@ class MusicPlayerHandler @Inject constructor(
                 val mediaItems = createMediaItems(songs)
 
                 // 3. ¡USAMOS EL CONTROLLER!
-                initMediaController(controller, mediaItems, startIndex, playWhenReady)
+                initMediaController(controller, mediaItems, startIndex, playWhenReady, initialShuffle, initialRepeat)
             }catch (ex: Exception){
                 Log.e("REPRODUCTOR", "Error al recuperar el controlador: ${ex.message}")
                 isInitializing = false
@@ -62,8 +77,12 @@ class MusicPlayerHandler @Inject constructor(
     private fun initMediaController(controller: MediaController,
                                     items: List<MediaItem>,
                                     startIndex: Int,
-                                    playWhenReady: Boolean){
+                                    playWhenReady: Boolean,
+                                    initialShuffle: Boolean,
+                                    initialRepeat: Boolean){
         controller.let { controller ->
+            controller.shuffleModeEnabled = initialShuffle
+            controller.repeatMode = if (initialRepeat) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
             controller.setMediaItems(items)
             controller.prepare()
             controller.seekTo(startIndex, 0L)
@@ -116,6 +135,17 @@ class MusicPlayerHandler @Inject constructor(
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 val currentIndex = controller.currentMediaItemIndex
                 onMediaItemTransition?.invoke(currentIndex)
+            }
+
+            override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                _shuffleEnabled.value = shuffleModeEnabled
+                scope.launch { musicPrefs.saveShuffle(shuffleModeEnabled) }
+            }
+
+            override fun onRepeatModeChanged(repeatMode: Int) {
+                val isRepeatAll = repeatMode == Player.REPEAT_MODE_ALL
+                _repeatEnabled.value = isRepeatAll
+                scope.launch { musicPrefs.saveRepeat(isRepeatAll) }
             }
         })
     }

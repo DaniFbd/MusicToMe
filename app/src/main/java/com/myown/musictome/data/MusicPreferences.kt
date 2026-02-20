@@ -31,4 +31,10 @@ class MusicPreferences @Inject constructor(
     }
 
     val isShuffleEnabled: Flow<Boolean> = context.dataStore.data.map { it[SHUFFLE_ON] ?: false }
+
+    suspend fun saveRepeat(enabled: Boolean) {
+        context.dataStore.edit { it[REPEAT_ON] = enabled }
+    }
+
+    val isRepeatEnabled: Flow<Boolean> = context.dataStore.data.map { it[REPEAT_ON] ?: false }
 }
