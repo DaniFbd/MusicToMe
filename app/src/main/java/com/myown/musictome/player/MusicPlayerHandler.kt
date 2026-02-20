@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -40,16 +41,21 @@ class MusicPlayerHandler @Inject constructor(
         val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
 
         controllerFuture.addListener({
-            val controller = controllerFuture.get()
-            mediaController = controller
+            try {
+                val controller = controllerFuture.get()
+                mediaController = controller
 
-            setMediaItemTransition(controller)
+                setMediaItemTransition(controller)
 
-            // 2. Preparamos los MediaItems
-            val mediaItems = createMediaItems(songs)
+                // 2. Preparamos los MediaItems
+                val mediaItems = createMediaItems(songs)
 
-            // 3. ¡USAMOS EL CONTROLLER!
-            initMediaController(controller, mediaItems, startIndex, playWhenReady)
+                // 3. ¡USAMOS EL CONTROLLER!
+                initMediaController(controller, mediaItems, startIndex, playWhenReady)
+            }catch (ex: Exception){
+                Log.e("REPRODUCTOR", "Error al recuperar el controlador: ${ex.message}")
+                isInitializing = false
+            }
         }, ContextCompat.getMainExecutor(context))
     }
 
@@ -115,11 +121,10 @@ class MusicPlayerHandler @Inject constructor(
     }
 
     fun releaseController() {
-        mediaController?.release()
-        mediaController = null
-
-        if (exoPlayer.playbackState != Player.STATE_IDLE) {
-            exoPlayer.stop()
+        mediaController?.let {
+            it.release()
+            mediaController = null
+            isInitializing = false
         }
     }
 
