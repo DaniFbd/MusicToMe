@@ -8,10 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myown.musictome.data.MusicLoader
 import com.myown.musictome.data.MusicPreferences
+import com.myown.musictome.di.PlayerModule
 import com.myown.musictome.model.Song
 import com.myown.musictome.player.MusicPlayerHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
@@ -22,7 +22,7 @@ import javax.inject.Named
 
 @HiltViewModel
 class MusicViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @PlayerModule.AttributedContext private val context: Context,
     @Named("IODispatcher") private val ioDispatcher: CoroutineDispatcher,
     @Named("MainDispatcher") private val mainDispatcher: CoroutineDispatcher,
     private val playerHandler: MusicPlayerHandler,

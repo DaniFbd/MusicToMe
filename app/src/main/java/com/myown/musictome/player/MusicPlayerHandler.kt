@@ -1,6 +1,7 @@
 package com.myown.musictome.player
 
 import android.content.ComponentName
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
@@ -14,7 +15,6 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.myown.musictome.model.Song
 import javax.inject.Inject
-import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.core.net.toUri
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -26,10 +26,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.myown.musictome.R
+import com.myown.musictome.di.PlayerModule
 
 @Singleton
 class MusicPlayerHandler @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @PlayerModule.AttributedContext private val context: Context,
     private val exoPlayer: ExoPlayer,
     private val musicPrefs: MusicPreferences
 ) {
@@ -119,10 +121,26 @@ class MusicPlayerHandler @Inject constructor(
     }
 
     private fun getSongImgUri(song: Song): Uri? {
-        if (!song.imageUrl.isNullOrEmpty() && song.imageUrl.startsWith("content://")) {
-            return song.imageUrl.toUri()
+        val mediaStoreUri = song.imageUrl?.toUri()
+        if (imageExist(mediaStoreUri)) {
+            return mediaStoreUri
         }
-        return null
+        return Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(context.resources.getResourcePackageName(R.drawable.default_album_art))
+            .appendPath(context.resources.getResourceTypeName(R.drawable.default_album_art))
+            .appendPath(context.resources.getResourceEntryName(R.drawable.default_album_art))
+            .build()
+    }
+
+    private fun imageExist(uri: Uri?): Boolean {
+        if (uri == null) return false
+        return try{
+            context.contentResolver.openInputStream(uri)?.use{
+                it.close()
+                true
+            }?:false
+        }catch (e: Exception){ false}
     }
 
     private fun setMediaItemTransition(controller: MediaController) {

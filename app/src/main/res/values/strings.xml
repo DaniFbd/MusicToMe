@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MusicToMe</string>
+    <string name="attribution_label">Music Playback Service</string>
+    <string name="empty">""</string>
 </resources>

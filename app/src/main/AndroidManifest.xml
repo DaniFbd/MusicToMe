@@ -7,6 +7,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
+    <attribution
+            android:tag="music_playback"
+            android:label="@string/attribution_label" />
+    <attribution
+            android:tag="@string/empty"
+            android:label="@string/attribution_label" />
+
     <application
             android:name=".ui.MusicToMeApp"
             android:requestLegacyExternalStorage="true"

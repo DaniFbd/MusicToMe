@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.myown.musictome.model.Song
+import com.myown.musictome.R
 
 @Composable
 fun BottomPlayerBar(
@@ -64,11 +66,14 @@ fun BottomPlayerBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = song.imageUrl ?: "https://via.placeholder.com/150",
+                    model = song.imageUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(8.dp)),
+                    placeholder = painterResource(R.drawable.default_album_art),
+                    error = painterResource(R.drawable.default_album_art),
+                    fallback = painterResource(R.drawable.default_album_art),
                     contentScale = ContentScale.Crop
                 )
 

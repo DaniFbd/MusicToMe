@@ -2,11 +2,9 @@ package com.myown.musictome.player
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.os.Build
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
-import androidx.core.app.ServiceCompat
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -33,6 +31,13 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
+        //Silenciamos logs de auditoria
+        val attributionContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            createAttributionContext("music_playback")
+        } else {
+            this
+        }
+
         val channelId = "music_playback_channel"
         val channel = android.app.NotificationChannel(
             channelId,
@@ -45,15 +50,15 @@ class PlaybackService : MediaSessionService() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
         notificationManager.createNotificationChannel(channel)
 
-        val intent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val intent = Intent(attributionContext, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(attributionContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val notificationProvider = DefaultMediaNotificationProvider.Builder(this)
+        val notificationProvider = DefaultMediaNotificationProvider.Builder(attributionContext)
             .setChannelId(channelId)
             .build()
         setMediaNotificationProvider(notificationProvider)
 
-        mediaSession = MediaSession.Builder(this, player)
+        mediaSession = MediaSession.Builder(attributionContext, player)
             .setCallback(MediaSessionCallback())
             .setSessionActivity(pendingIntent)
             .build()
