@@ -6,8 +6,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -20,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,13 +31,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.myown.musictome.ui.components.BottomPlayerBar
+import com.myown.musictome.ui.components.SearchComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongListScreen(
     viewModel: MusicViewModel = hiltViewModel()
 ) {
-    val songs by viewModel.songs
+    val songs by viewModel.filteredSongs.collectAsState()
+    val query by viewModel.searchQuery.collectAsState()
     val isLoading by viewModel.isLoading
     val currentSong by viewModel.currentSong
     val isPlaying by viewModel.isPlaying
@@ -97,32 +102,47 @@ fun SongListScreen(
             }
         }
     ){ innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentAlignment = Alignment.Center // Centrar
         ) {
-            if (isLoading) {
-                // Este es el spinner de carga de Material 3
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Buscando tu música...",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            } else if (songs.isEmpty()) {
-                // Caso por si no encuentra nada o no hay permiso
-                Text(text = "No se encontraron canciones.")
-            } else {
-                // La lista real
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(songs) { song ->
-                        SongItem(song = song, onClick = { viewModel.onSongClick(song) })
+
+            SearchComponent(
+                query = query,
+                onQueryChange = { viewModel.onSearchQueryChange(it) }
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f), // Esto hace que este Box ocupe el resto de la pantalla
+                contentAlignment = Alignment.Center
+            ) {
+                if (isLoading) {
+                    // Este es el spinner de carga
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Buscando tu música...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else if (songs.isEmpty()) {
+                    // Caso por si no encuentra nada o no hay permiso
+                    Text(text = "No se encontraron canciones.")
+                } else {
+                    // La lista real
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(songs) { song ->
+                            SongItem(song = song, onClick = { viewModel.onSongClick(song) })
+                        }
                     }
                 }
             }

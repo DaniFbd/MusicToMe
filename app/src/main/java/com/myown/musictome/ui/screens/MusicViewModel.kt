@@ -14,9 +14,14 @@ import com.myown.musictome.player.MusicPlayerHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Collections.emptyList
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -51,6 +56,24 @@ class MusicViewModel @Inject constructor(
 
     private val _totalDuration = mutableStateOf(0L)
     val totalDuration: State<Long> = _totalDuration
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    val filteredSongs = combine(snapshotFlow { _songs.value }, _searchQuery) { songs, query ->
+        if (query.isBlank()) {
+            songs
+        } else {
+            songs.filter { song ->
+                song.title.contains(query, ignoreCase = true) ||
+                        song.artist.contains(query, ignoreCase = true)
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     init {
         playerHandler.setOnSongChangedListener { index ->
@@ -98,6 +121,10 @@ class MusicViewModel @Inject constructor(
                 _isRepeatAllEnabled.value = valorReal
             }
         }
+    }
+
+    fun onSearchQueryChange(newQuery: String) {
+        _searchQuery.value = newQuery
     }
 
     fun loadSongs() {
