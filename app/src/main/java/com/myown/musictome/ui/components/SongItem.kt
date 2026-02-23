@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.myown.musictome.R
 import com.myown.musictome.model.Song
 
 @Composable
@@ -30,10 +32,10 @@ fun SongItem(song: Song, onClick: () -> Unit) {
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Carátula del álbum con Coil
+            // Caratula del album
             AsyncImage(
                 model = song.imageUrl,
-                contentDescription = "Carátula de ${song.title}",
+                contentDescription = stringResource(R.string.song_item_caratula, song.title),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp)),

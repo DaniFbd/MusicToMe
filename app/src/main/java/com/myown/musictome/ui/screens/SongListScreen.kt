@@ -28,15 +28,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.myown.musictome.ui.components.BottomPlayerBar
 import com.myown.musictome.ui.components.SearchComponent
+import com.myown.musictome.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongListScreen(
-    viewModel: MusicViewModel = hiltViewModel()
+    viewModel: MusicViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier
 ) {
     val songs by viewModel.filteredSongs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
@@ -73,11 +76,12 @@ fun SongListScreen(
     }
 
     Scaffold (
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Mi Música",
+                        stringResource(R.string.song_list_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -116,7 +120,7 @@ fun SongListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f), // Esto hace que este Box ocupe el resto de la pantalla
+                    .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 if (isLoading) {
@@ -127,13 +131,13 @@ fun SongListScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Buscando tu música...",
+                            text = stringResource(R.string.song_list_loading),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 } else if (songs.isEmpty()) {
                     // Caso por si no encuentra nada o no hay permiso
-                    Text(text = "No se encontraron canciones.")
+                    Text(text = stringResource(R.string.song_list_not_found))
                 } else {
                     // La lista real
                     LazyColumn(
@@ -153,7 +157,7 @@ fun SongListScreen(
                 onDismissRequest = { showBottomSheet = false },
                 sheetState = sheetState,
                 containerColor = MaterialTheme.colorScheme.surface,
-                dragHandle = { BottomSheetDefaults.DragHandle() } // La rayita de arriba para deslizar
+                dragHandle = { BottomSheetDefaults.DragHandle() }
             ) {
                 CurrentSongScreen(
                     viewModel = viewModel,

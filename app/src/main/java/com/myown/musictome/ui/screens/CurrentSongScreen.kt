@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.myown.musictome.R
@@ -60,7 +61,7 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(20.dp))
 
         AsyncImage(
-            model = song?.imageUrl ?: "https://via.placeholder.com/300",
+            model = song?.imageUrl,
             contentDescription = null,
             modifier = Modifier
                 .size(300.dp)
@@ -73,8 +74,8 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        Text(text = song?.title ?: "Desconocido", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text(text = song?.artist ?: "Artista", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+        Text(text = song?.title ?: stringResource(R.string.current_song_unknown), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(text = song?.artist ?: stringResource(R.string.current_song_artist), style = MaterialTheme.typography.titleMedium, color = Color.Gray)
 
         Spacer(modifier = Modifier.height(30.dp))
 

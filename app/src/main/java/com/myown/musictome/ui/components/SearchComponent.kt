@@ -15,7 +15,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.myown.musictome.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,14 +32,14 @@ fun SearchComponent(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        placeholder = { Text("Buscar canciones o artistas...") },
+        placeholder = { Text(stringResource(R.string.search_placeholder)) },
         leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar")
+            Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(R.string.search))
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Limpiar")
+                    Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.clean))
                 }
             }
         },
