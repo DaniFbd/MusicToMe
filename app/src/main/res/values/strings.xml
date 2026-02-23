@@ -2,4 +2,19 @@
     <string name="app_name">MusicToMe</string>
     <string name="attribution_label">Music Playback Service</string>
     <string name="empty">""</string>
+    <!-- SearchComponent -->
+    <string name="search">Buscar</string>
+    <string name="clean">Limpiar</string>
+    <string name="search_placeholder">Buscar canciones o artistas...</string>
+    <!-- SongListScreen -->
+    <string name="song_list_title">Lista de canciones</string>
+    <string name="song_list_loading">Cargando tu música</string>
+    <string name="song_list_not_found">No se encontraron canciones.</string>
+    <!-- CurrentSongScreen -->
+    <string name="current_song_unknown">Desconocido</string>
+    <string name="current_song_artist">Artista</string>
+    <!-- BottomPlayerBar -->
+    <string name="bottom_player_play_pause">Reproducir/Pausar</string>
+    <!-- SongItem -->
+    <string name="song_item_caratula">Carátula de %1$s</string>
 </resources>
