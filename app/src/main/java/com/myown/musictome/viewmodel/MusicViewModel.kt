@@ -213,6 +213,12 @@ class MusicViewModel @Inject constructor(
         }
     }
 
+    fun updatePlaylist(playlist: PlaylistEntity, newName: String) {
+        viewModelScope.launch(ioDispatcher) {
+            playlistDao.insertPlaylist(playlist.copy(name = newName))
+        }
+    }
+
     fun deletePlaylist(playlist: PlaylistEntity) {
         viewModelScope.launch {
             playlistDao.deletePlaylist(playlist)

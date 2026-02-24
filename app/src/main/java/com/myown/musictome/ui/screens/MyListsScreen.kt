@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.myown.musictome.R
+import com.myown.musictome.data.local.PlaylistEntity
 import com.myown.musictome.ui.components.PlaylistExpandableItem
 import com.myown.musictome.viewmodel.MusicViewModel
 
@@ -34,6 +35,8 @@ fun MyListsScreen(
     val playlists by viewModel.playlists.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
+    var playlistToEdit by remember { mutableStateOf<PlaylistEntity?>(null) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -66,13 +69,43 @@ fun MyListsScreen(
             }
 
             items(playlists) { playlist ->
-                PlaylistExpandableItem(playlist, viewModel)
+                PlaylistExpandableItem(playlist, viewModel, onEditClick = {
+                    playlistToEdit = it
+                    showEditDialog = true
+                })
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                 )
             }
         }
+    }
+
+    if (showEditDialog && playlistToEdit != null) {
+        var editedName by remember { mutableStateOf(playlistToEdit!!.name) }
+
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text(stringResource(R.string.my_lists_edit_dialog_title)) },
+            text = {
+                OutlinedTextField(
+                    value = editedName,
+                    onValueChange = { editedName = it },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (editedName.isNotBlank()) {
+                        viewModel.updatePlaylist(playlistToEdit!!, editedName)
+                        showEditDialog = false
+                    }
+                }) { Text(stringResource(R.string.btn_save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) { Text(stringResource(R.string.btn_cancel)) }
+            }
+        )
     }
 
     // Dialogo para crear lista
