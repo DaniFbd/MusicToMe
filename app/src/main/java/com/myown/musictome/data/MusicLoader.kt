@@ -40,17 +40,12 @@ class MusicLoader (private val context: Context) {
                 val durationMs = it.getLong(durationColumn)
                 val albumId = it.getLong(albumIdColumn)
 
-                // Convertimos milisegundos a formato mm:ss
-                val minutes = (durationMs / 1000) / 60
-                val seconds = (durationMs / 1000) % 60
-                val duration = String.format("%02d:%02d", minutes, seconds)
-
                 val artUri = ContentUris.withAppendedId(
                     Uri.parse("content://media/external/audio/albumart"),
                     albumId
                 ).toString()
 
-                songList.add(Song(id, title, artist, duration, imageUrl = artUri))
+                songList.add(Song(id, title, artist, durationMs, imageUrl = artUri))
             }
         }
         return songList

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.myown.musictome.R
 import com.myown.musictome.formatTime
+import com.myown.musictome.viewmodel.MusicViewModel
 
 @Composable
 fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {

@@ -2,6 +2,9 @@
     <string name="app_name">MusicToMe</string>
     <string name="attribution_label">Music Playback Service</string>
     <string name="empty">""</string>
+    <string name="btn_create">Crear</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="btn_back">Atrás</string>
     <!-- SearchComponent -->
     <string name="search">Buscar</string>
     <string name="clean">Limpiar</string>
@@ -17,4 +20,15 @@
     <string name="bottom_player_play_pause">Reproducir/Pausar</string>
     <!-- SongItem -->
     <string name="song_item_caratula">Carátula de %1$s</string>
+    <string name="song_item_to_list">Asignar a la lista…</string>
+    <string name="song_item_menu_description">Opciones de canción</string>
+    <!-- AddToPlaylistDialog -->
+    <string name="add_list_dialog_title">Añadir a una lista</string>
+    <!-- MyListScreen -->
+    <string name="my_lists_title">Mis listas</string>
+    <string name="my_lists_create_dialog_title">Crear lista</string>
+    <string name="my_lists_create_dialog_placeholder">Nombre lista</string>
+    <string name="my_lists_number_songs">%1$d canciones</string>
+    <string name="my_lists_no_list">No tienes listas creadas. ¡Pulsa el botón + para empezar!</string>
+
 </resources>

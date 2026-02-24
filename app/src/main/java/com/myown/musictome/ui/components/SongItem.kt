@@ -4,9 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,10 +21,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.myown.musictome.R
+import com.myown.musictome.formatTime
 import com.myown.musictome.model.Song
 
 @Composable
-fun SongItem(song: Song, onClick: () -> Unit) {
+fun SongItem(
+    song: Song,
+    onClick: () -> Unit,
+    onAddToPlaylist: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,7 +63,29 @@ fun SongItem(song: Song, onClick: () -> Unit) {
                 Text(text = song.artist, style = MaterialTheme.typography.bodySmall)
             }
 
-            Text(text = song.duration, style = MaterialTheme.typography.labelSmall)
+            Text(text = formatTime(song.duration), style = MaterialTheme.typography.labelSmall)
+
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.song_item_menu_description)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.song_item_to_list)) },
+                        onClick = {
+                            showMenu = false
+                            onAddToPlaylist()
+                        }
+                    )
+                }
+            }
         }
     }
 }
