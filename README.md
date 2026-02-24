@@ -1,65 +1,68 @@
-# MusicToMe 🎵
+MusicToMe 🎵
 
-Aplicación de reproducción de música para Android simple y eficiente.
+Aplicación de reproducción de música para Android, simple, eficiente y diseñada bajo estándares modernos de desarrollo.
+🚀 Características
 
-## 🚀 Características
-- **Reproducción Profesional**: Basada en Jetpack Media3 para una gestión óptima de audio.
-- **Segundo Plano**: Soporta controles desde la notificación del sistema y dispositivos Bluetooth.
-- **Memoria Inteligente**: Gracias a DataStore, la app recuerda tu última canción incluso después de reiniciarse.
-- **UI Reactiva**: Interfaz fluida construida al 100% con Jetpack Compose.
+    Gestión de Listas: Crea, edita y elimina tus propias playlists locales con un sistema de menús contextuales (Long Press).
 
-## 🛠️ Tecnologías utilizadas
-- [Kotlin](https://kotlinlang.org/) - Lenguaje principal.
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) - Toolkit moderno para UI.
-- [Media3 / ExoPlayer](https://developer.android.com/guide/topics/media/media3) - Motor de reproducción.
-- [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) - Inyección de dependencias.
-- [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) - Almacenamiento de preferencias.
+    Reproducción Profesional: Basada en Jetpack Media3 para una gestión de audio fluida y robusta.
 
-## 📱 Requisitos
-- Android 8.0 (API 26) o superior.
-- Permisos de lectura de almacenamiento concedidos.
+    Segundo Plano Inteligente: PlaybackService optimizado para no consumir batería innecesariamente, con controles desde la notificación y Bluetooth.
 
-## 🛠️ Instalación
-1. Clona el repositorio:
-   ```bash
-   git clone [https://github.com/tu-usuario/musictome.git](https://github.com/tu-usuario/musictome.git)
+    Memoria de Sesión: La app recuerda tu última canción, el modo aleatorio y la repetición gracias a DataStore.
 
-2. Abre el proyecto en Android Studio Jellyfish o superior.
+    Arquitectura Reactiva: Interfaz 100% construida con Jetpack Compose, sincronizada en tiempo real con la base de datos.
 
-3. Sincroniza Gradle y ejecuta la app en un dispositivo real o emulador.
+    Buscador Integrado: Encuentra cualquier canción en tu biblioteca al instante.
 
-4. 🧪 Pruebas y Compatibilidad
+🛠️ Tecnologías utilizadas
 
-La aplicación ha sido sometida a pruebas de estrés y rendimiento en entornos reales, asegurando estabilidad en sistemas operativos con configuraciones de seguridad avanzada.
-Entorno de Pruebas Principal
+    Kotlin: Lenguaje moderno y seguro.
 
-    Dispositivo: Google Pixel 10 PRO (Marca Móvil de referencia para GrapheneOS).
+    Jetpack Compose: UI declarativa de alto rendimiento.
 
-    Sistema Operativo: GrapheneOS (Basado en Android 16 Compilacion 2026021201).
+    Media3 / ExoPlayer: El motor de Google para reproducción multimedia.
 
-    Configuración: Sin Google Play Services (Sandboxed Play Services opcionales).
+    Room Database: Persistencia local para tus playlists y metadatos.
 
-Puntos Verificados en GrapheneOS
+    Hilt (Dagger): Inyección de dependencias para un código limpio y testeable.
 
-    Gestión de Permisos: Funcionamiento correcto del acceso a archivos locales mediante el Storage Access Framework.
+    DataStore: Alternativa moderna y reactiva a SharedPreferences.
 
-    Ciclo de Vida del Servicio: El PlaybackService se mantiene estable bajo las estrictas políticas de ahorro de energía de GrapheneOS.
+📱 Requisitos y Compatibilidad
 
-    Privacidad: La aplicación no requiere conexión a red ni telemetría, alineándose con los principios del sistema operativo.
+    Android 8.0 (API 26) o superior.
 
-    Notificaciones de Media: Los controles en la pantalla de bloqueo y el panel de ajustes rápidos responden sin retardos (latencia mínima).
+    GrapheneOS Ready: Probada en entornos de máxima privacidad sin dependencia de Google Play Services.
 
-5. 🛠️ Estado del Proyecto y Próximos Pasos
-Puedes ver las tareas pendientes y los errores identificados en nuestra sección de [Issues](https://github.com/DaniFbd/MusicToMe/issues).
+🧪 Pruebas de Rendimiento (Referencia 2026)
 
+La aplicación ha sido validada en configuraciones de seguridad avanzada:
 
-## ⚖️ Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+    Entorno: Google Pixel 10 PRO sobre GrapheneOS (Android 16).
 
-## 👨‍💻 Autor
+    Puntos Verificados:
 
-**Daniel Cano Nicolau** *Desarrollador Java especializado en aplicaciones Web | Explorando el ecosistema Android con Kotlin y Jetpack Compose.*
+        Ciclo de vida: Cierre total de procesos al eliminar la app de "Recientes".
+
+        Latencia: Respuesta instantánea en controles de medios y cambios de metadatos.
+
+        Privacidad: Cero telemetría y funcionamiento 100% offline.
+
+🛠️ Instalación y Uso
+
+    Clona el repositorio:
+    Bash
+
+    git clone https://github.com/DaniFbd/MusicToMe.git
+
+    Abre el proyecto en Android Studio Jellyfish (o superior).
+
+    Compila: Asegúrate de conceder permisos de lectura de medios al arrancar.
+
+👨‍💻 Autor
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/dani-cano-nicolau-a33256277/)
 
-Si encuentras un error que no esté en esta lista, por favor abre un Issue en este repositorio.
+
+Si encuentras un error que no esté en esta lista, por favor abre un Issue en este repositorio. 
