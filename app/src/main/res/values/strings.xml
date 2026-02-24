@@ -5,6 +5,9 @@
     <string name="btn_create">Crear</string>
     <string name="btn_cancel">Cancelar</string>
     <string name="btn_back">Atrás</string>
+    <string name="btn_edit">Editar</string>
+    <string name="btn_delete">Eliminar</string>
+    <string name="btn_save">Guardar</string>
     <!-- SearchComponent -->
     <string name="search">Buscar</string>
     <string name="clean">Limpiar</string>
@@ -31,5 +34,6 @@
     <string name="my_lists_create_dialog_placeholder">Nombre lista</string>
     <string name="my_lists_number_songs">%1$d canciones</string>
     <string name="my_lists_no_list">No tienes listas creadas. ¡Pulsa el botón + para empezar!</string>
+    <string name="my_lists_edit_dialog_title">Cambiar nombre a la lista</string>
 
 </resources>
