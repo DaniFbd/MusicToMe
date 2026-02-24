@@ -24,6 +24,7 @@
     <string name="song_item_menu_description">Opciones de canción</string>
     <!-- AddToPlaylistDialog -->
     <string name="add_list_dialog_title">Añadir a una lista</string>
+    <string name="add_list_dialog_no_lists">No tienes listas creadas todavía.</string>
     <!-- MyListScreen -->
     <string name="my_lists_title">Mis listas</string>
     <string name="my_lists_create_dialog_title">Crear lista</string>

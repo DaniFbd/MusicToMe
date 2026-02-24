@@ -2,9 +2,6 @@ package com.myown.musictome.player
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Build
-import androidx.annotation.OptIn
-import androidx.annotation.RequiresApi
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -21,22 +18,11 @@ class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
 
     @UnstableApi
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        return START_STICKY
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    @UnstableApi
     override fun onCreate() {
         super.onCreate()
 
-        //Silenciamos logs de auditoria
-        val attributionContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            createAttributionContext("music_playback")
-        } else {
-            this
-        }
+        //Para logs de auditoria
+        val attributionContext = createAttributionContext("music_playback")
 
         val channelId = "music_playback_channel"
         val channel = android.app.NotificationChannel(
@@ -70,25 +56,23 @@ class PlaybackService : MediaSessionService() {
         })
     }
 
-    @UnstableApi
-    override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
-        super.onUpdateNotification(session, startInForegroundRequired)
-    }
-
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+
         player.stop()
-        player.release()
+        player.clearMediaItems()
+
         mediaSession?.run {
             release()
             mediaSession = null
         }
-        stopForeground(STOP_FOREGROUND_REMOVE)
+
         stopSelf()
-        super.onTaskRemoved(rootIntent)
+
         android.os.Process.killProcess(android.os.Process.myPid())
     }
 
@@ -102,7 +86,6 @@ class PlaybackService : MediaSessionService() {
     }
 
     private class MediaSessionCallback : MediaSession.Callback {
-        @OptIn(UnstableApi::class)
         override fun onConnect(
             session: MediaSession,
             controller: MediaSession.ControllerInfo
@@ -115,6 +98,4 @@ class PlaybackService : MediaSessionService() {
                 .build()
         }
     }
-
 }
-

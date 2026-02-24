@@ -19,6 +19,7 @@ import com.myown.musictome.model.Song
 import com.myown.musictome.player.MusicPlayerHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,11 +42,10 @@ class MusicViewModel @Inject constructor(
     private val playerHandler: MusicPlayerHandler,
     private val musicPrefs: MusicPreferences
 ) : ViewModel() {
+    private var progressJob: Job? = null
     private var isPlayingFromCustomPlaylist = false
     private var lastClickTime = 0L
-
     private val _songs = mutableStateOf<List<Song>>(Collections.emptyList())
-    val songs: State<List<Song>> = _songs
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
@@ -91,27 +91,23 @@ class MusicViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            playerHandler.isPlaying.collect { valorReal ->
-                _isPlaying.value = valorReal
-            }
+            launch { playerHandler.isPlaying.collect { playing ->
+                _isPlaying.value = playing
+                if (playing) {
+                    startProgressUpdate()
+                } else {
+                    progressJob?.cancel()
+                }
+            } }
+            launch { playerHandler.shuffleEnabled.collect { _isShuffleEnabled.value = it } }
+            launch { playerHandler.repeatEnabled.collect { _isRepeatAllEnabled.value = it } }
         }
 
-        playerHandler.onMediaItemTransition = { mediaItem ->
-            mediaItem?.let { item ->
-                val song = Song(
-                    id = item.mediaId,
-                    title = item.mediaMetadata.title.toString(),
-                    artist = item.mediaMetadata.artist.toString(),
-                    duration = _totalDuration.value,
-                    imageUrl = item.mediaMetadata.artworkUri.toString(),
-                )
-                _currentSong.value = song
-                viewModelScope.launch {
-                    musicPrefs.saveLastSong(song.id)
-                }
-            }
-        }
-        updateProgress()
+        setupPlayerListeners()
+        restoreLastSession()
+    }
+
+    private fun restoreLastSession(){
         viewModelScope.launch(ioDispatcher) {
             val songsFlow = snapshotFlow { _songs.value }
 
@@ -145,15 +141,22 @@ class MusicViewModel @Inject constructor(
                 }
             }
         }
-        viewModelScope.launch {
-            playerHandler.shuffleEnabled.collect { valorReal ->
-                _isShuffleEnabled.value = valorReal
-            }
-        }
+    }
 
-        viewModelScope.launch {
-            playerHandler.repeatEnabled.collect { valorReal ->
-                _isRepeatAllEnabled.value = valorReal
+    private fun setupPlayerListeners() {
+        playerHandler.onMediaItemTransition = { mediaItem ->
+            mediaItem?.let { item ->
+                val song = Song(
+                    id = item.mediaId,
+                    title = item.mediaMetadata.title.toString(),
+                    artist = item.mediaMetadata.artist.toString(),
+                    duration = item.mediaMetadata.durationMs ?: 0L,
+                    imageUrl = item.mediaMetadata.artworkUri.toString(),
+                )
+                _currentSong.value = song
+                viewModelScope.launch {
+                    musicPrefs.saveLastSong(song.id)
+                }
             }
         }
     }
@@ -285,17 +288,15 @@ class MusicViewModel @Inject constructor(
         }
     }
 
-    fun updateProgress() {
-        viewModelScope.launch (ioDispatcher){
-            while(true){
-                if (isPlaying.value) {
-                    withContext(mainDispatcher) {
-                        val pos = playerHandler.getCurrentPosition()
-                        val dur = playerHandler.getDuration()
-
-                        _currentPosition.value = pos
-                        _totalDuration.value = dur
-                    }
+    fun startProgressUpdate() {
+        progressJob?.cancel()
+        progressJob = viewModelScope.launch(ioDispatcher) {
+            while (true) {
+                withContext(mainDispatcher) {
+                    val pos = playerHandler.getCurrentPosition()
+                    val dur = playerHandler.getDuration()
+                    _currentPosition.value = pos
+                    _totalDuration.value = dur
                 }
                 delay(1000)
             }
