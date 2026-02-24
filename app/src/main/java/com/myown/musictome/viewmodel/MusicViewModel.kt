@@ -1,6 +1,7 @@
-package com.myown.musictome.ui.screens
+package com.myown.musictome.viewmodel
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
@@ -8,12 +9,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myown.musictome.data.MusicLoader
 import com.myown.musictome.data.MusicPreferences
+import com.myown.musictome.data.local.PlaylistDao
+import com.myown.musictome.data.local.PlaylistEntity
+import com.myown.musictome.data.local.PlaylistSongCrossRef
+import com.myown.musictome.data.local.SongMetadataEntity
+import com.myown.musictome.data.local.toSong
 import com.myown.musictome.di.PlayerModule
 import com.myown.musictome.model.Song
 import com.myown.musictome.player.MusicPlayerHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Collections.emptyList
+import java.util.Collections
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -30,10 +37,14 @@ class MusicViewModel @Inject constructor(
     @PlayerModule.AttributedContext private val context: Context,
     @Named("IODispatcher") private val ioDispatcher: CoroutineDispatcher,
     @Named("MainDispatcher") private val mainDispatcher: CoroutineDispatcher,
+    private val playlistDao: PlaylistDao,
     private val playerHandler: MusicPlayerHandler,
     private val musicPrefs: MusicPreferences
 ) : ViewModel() {
-    private val _songs = mutableStateOf<List<Song>>(emptyList())
+    private var isPlayingFromCustomPlaylist = false
+    private var lastClickTime = 0L
+
+    private val _songs = mutableStateOf<List<Song>>(Collections.emptyList())
     val songs: State<List<Song>> = _songs
 
     private val _isLoading = mutableStateOf(false)
@@ -71,13 +82,29 @@ class MusicViewModel @Inject constructor(
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+        started = SharingStarted.Companion.WhileSubscribed(5000),
+        initialValue = Collections.emptyList()
     )
 
+    val playlists = playlistDao.getAllPlaylists()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
-        playerHandler.setOnSongChangedListener { index ->
-            _songs.value.getOrNull(index)?.let { song ->
+        viewModelScope.launch {
+            playerHandler.isPlaying.collect { valorReal ->
+                _isPlaying.value = valorReal
+            }
+        }
+
+        playerHandler.onMediaItemTransition = { mediaItem ->
+            mediaItem?.let { item ->
+                val song = Song(
+                    id = item.mediaId,
+                    title = item.mediaMetadata.title.toString(),
+                    artist = item.mediaMetadata.artist.toString(),
+                    duration = _totalDuration.value,
+                    imageUrl = item.mediaMetadata.artworkUri.toString(),
+                )
                 _currentSong.value = song
                 viewModelScope.launch {
                     musicPrefs.saveLastSong(song.id)
@@ -92,8 +119,9 @@ class MusicViewModel @Inject constructor(
                 musicPrefs.lastSongId,
                 musicPrefs.isShuffleEnabled,
                 musicPrefs.isRepeatEnabled,
-                songsFlow) { id,shuffle,repeat, songs ->
-                InitialState(id,shuffle,repeat, songs)
+                songsFlow
+            ) { id, shuffle, repeat, songs ->
+                InitialState(id, shuffle, repeat, songs)
             }.collect { state ->
                 if (state.songs.isEmpty()) return@collect
 
@@ -106,7 +134,14 @@ class MusicViewModel @Inject constructor(
                         0
                     }
                     _currentSong.value = state.songs[index]
-                    playerHandler.setupPlaylist(state.songs, index, playWhenReady = false,state.shuffle, state.repeat)
+                    playerHandler.setupPlaylist(
+                        state.songs,
+                        startIndex = index,
+                        playWhenReady = false,
+                        isGeneralList = true,
+                        initialShuffle = state.shuffle,
+                        initialRepeat = state.repeat
+                    )
                 }
             }
         }
@@ -123,6 +158,68 @@ class MusicViewModel @Inject constructor(
         }
     }
 
+    fun addSongToPlaylist(playlistId: Long, song: Song) {
+        viewModelScope.launch {
+            val metadata = SongMetadataEntity(
+                mediaId = song.id,
+                title = song.title,
+                artist = song.artist,
+                duration = song.duration,
+                artUri = song.imageUrl
+            )
+            playlistDao.insertSongMetadata(metadata)
+            playlistDao.addSongToPlaylist(
+                PlaylistSongCrossRef(playlistId, song.id)
+            )
+
+            Toast.makeText(context, "Añadida a la lista", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun removeSongFromPlaylist(playlistId: Long, songId: String) {
+        viewModelScope.launch {
+            playlistDao.removeSongFromPlaylist(playlistId,songId)
+        }
+    }
+
+    fun playSongFromPlaylist(songsParams: List<SongMetadataEntity>, songId: String) {
+        viewModelScope.launch {
+            isPlayingFromCustomPlaylist = true
+            val songsList = songsParams.map { it.toSong() }
+            val foundIndex = songsList.indexOfFirst { it.id == songId }
+            if(foundIndex != -1){
+                val shuffle = playerHandler.shuffleEnabled.value
+                val repeat = playerHandler.repeatEnabled.value
+                playerHandler.setupPlaylist(
+                    songs = songsList,
+                    startIndex = foundIndex,
+                    playWhenReady = true,
+                    initialShuffle = shuffle,
+                    initialRepeat = repeat)
+            }
+        }
+    }
+
+    suspend fun getListsForSong(songId: String): List<Long> {
+        return playlistDao.getPlaylistIdsForSong(songId)
+    }
+
+    fun createPlaylist(name: String) {
+        viewModelScope.launch {
+            playlistDao.insertPlaylist(PlaylistEntity(name = name))
+        }
+    }
+
+    fun deletePlaylist(playlist: PlaylistEntity) {
+        viewModelScope.launch {
+            playlistDao.deletePlaylist(playlist)
+        }
+    }
+
+    fun getSongsInPlaylist(playlistId: Long): Flow<List<SongMetadataEntity>> {
+        return playlistDao.getSongsFromPlaylist(playlistId)
+    }
+
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
     }
@@ -133,6 +230,10 @@ class MusicViewModel @Inject constructor(
             val loader = MusicLoader(context)
             val fetchedSongs = loader.fetchSongs()
 
+            if (fetchedSongs.isNotEmpty()) {
+                playerHandler.setGeneralPlaylist(fetchedSongs)
+            }
+
             withContext(mainDispatcher) {
                 _songs.value = fetchedSongs
                 _isLoading.value = false
@@ -141,12 +242,29 @@ class MusicViewModel @Inject constructor(
     }
 
     fun onSongClick(song: Song) {
-        _currentSong.value = song
-        _isPlaying.value = true
-        viewModelScope.launch {
-            musicPrefs.saveLastSong(song.id)
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastClickTime < 500) return
+        lastClickTime = currentTime
+
+        val songsList = _songs.value
+        val index = songsList.indexOfFirst { it.id == song.id }
+
+        if (index != -1) {
+            if (isPlayingFromCustomPlaylist || playerHandler.getCurrentMediaItemCount() == 0) {
+                isPlayingFromCustomPlaylist = false
+                playerHandler.setupPlaylist(
+                    songs = songsList,
+                    startIndex = index,
+                    playWhenReady = true,
+                    isGeneralList = true,
+                    initialShuffle = _isShuffleEnabled.value,
+                    initialRepeat = _isRepeatAllEnabled.value
+                )
+            }else{
+                playerHandler.jumpToSong(index)
+            }
+
         }
-        playerHandler.selectAndPlay(songs.value.indexOf(song))
     }
 
     fun next() { playerHandler.skipNext() }
@@ -163,7 +281,6 @@ class MusicViewModel @Inject constructor(
     fun togglePlayPause() {
         if (_currentSong.value != null) {
             val newState = !_isPlaying.value
-            _isPlaying.value = newState
             playerHandler.togglePlayPause(newState)
         }
     }

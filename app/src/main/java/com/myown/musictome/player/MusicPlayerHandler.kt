@@ -35,6 +35,8 @@ class MusicPlayerHandler @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val musicPrefs: MusicPreferences
 ) {
+    private var cachedGeneralMediaItems: List<MediaItem> = emptyList()
+
     private val scope= CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val _shuffleEnabled = MutableStateFlow(false)
     val shuffleEnabled = _shuffleEnabled.asStateFlow()
@@ -42,16 +44,34 @@ class MusicPlayerHandler @Inject constructor(
     private val _repeatEnabled = MutableStateFlow(false)
     val repeatEnabled = _repeatEnabled.asStateFlow()
 
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying = _isPlaying.asStateFlow()
+
     private var mediaController: MediaController? = null
-    var onMediaItemTransition: ((Int) -> Unit)? = null
+    var onMediaItemTransition: ((MediaItem?) -> Unit)? = null
     private var isInitializing = false
 
-    fun setOnSongChangedListener(callback: (Int) -> Unit) {
-        this.onMediaItemTransition = callback
-    }
+    fun setupPlaylist(
+        songs: List<Song>,
+        startIndex: Int,
+        playWhenReady: Boolean = true,
+        isGeneralList: Boolean = false,
+        initialShuffle: Boolean,
+        initialRepeat: Boolean
+    ) {
+        val items = if (isGeneralList && cachedGeneralMediaItems.isNotEmpty()) {
+            cachedGeneralMediaItems
+        } else {
+            createMediaItems(songs)
+        }
 
-    fun setupPlaylist(songs: List<Song>, startIndex: Int, playWhenReady: Boolean = true, initialShuffle: Boolean, initialRepeat: Boolean) {
-        if (mediaController != null || isInitializing) return
+        //Si lo volvemos a llamar, reiniciamos lista de reproduccion
+        mediaController?.let { controller ->
+            initMediaController(controller, items, startIndex, playWhenReady, initialShuffle, initialRepeat)
+            return
+        }
+
+        if (isInitializing) return
         isInitializing = true
 
         val sessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
@@ -64,11 +84,7 @@ class MusicPlayerHandler @Inject constructor(
 
                 setMediaItemTransition(controller)
 
-                // 2. Preparamos los MediaItems
-                val mediaItems = createMediaItems(songs)
-
-                // 3. ¡USAMOS EL CONTROLLER!
-                initMediaController(controller, mediaItems, startIndex, playWhenReady, initialShuffle, initialRepeat)
+                initMediaController(controller, items, startIndex, playWhenReady, initialShuffle, initialRepeat)
             }catch (ex: Exception){
                 Log.e("REPRODUCTOR", "Error al recuperar el controlador: ${ex.message}")
                 isInitializing = false
@@ -83,11 +99,15 @@ class MusicPlayerHandler @Inject constructor(
                                     initialShuffle: Boolean,
                                     initialRepeat: Boolean){
         controller.let { controller ->
+            controller.stop()
+            controller.clearMediaItems()
+
             controller.shuffleModeEnabled = initialShuffle
             controller.repeatMode = if (initialRepeat) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
+
             controller.setMediaItems(items)
-            controller.prepare()
             controller.seekTo(startIndex, 0L)
+            controller.prepare()
             if (playWhenReady) {
                 controller.play()
             }
@@ -103,6 +123,7 @@ class MusicPlayerHandler @Inject constructor(
                 .setTitle(validatedTitle)
                 .setArtist(validatedArtist)
                 .setArtworkUri(getSongImgUri(song))
+                .setDurationMs(song.duration)
                 .setDisplayTitle(validatedTitle)
                 .setExtras(Bundle().apply { putString("media_id", song.id) })
                 .build()
@@ -145,14 +166,12 @@ class MusicPlayerHandler @Inject constructor(
 
     private fun setMediaItemTransition(controller: MediaController) {
         if (mediaController?.currentMediaItem != null) {
-            val index = mediaController!!.currentMediaItemIndex
-            onMediaItemTransition?.invoke(index)
+            onMediaItemTransition?.invoke(mediaController?.currentMediaItem)
         }
 
         controller.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                val currentIndex = controller.currentMediaItemIndex
-                onMediaItemTransition?.invoke(currentIndex)
+                onMediaItemTransition?.invoke(mediaItem)
             }
 
             override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
@@ -165,15 +184,11 @@ class MusicPlayerHandler @Inject constructor(
                 _repeatEnabled.value = isRepeatAll
                 scope.launch { musicPrefs.saveRepeat(isRepeatAll) }
             }
-        })
-    }
 
-    fun releaseController() {
-        mediaController?.let {
-            it.release()
-            mediaController = null
-            isInitializing = false
-        }
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                _isPlaying.value = isPlaying
+            }
+        })
     }
 
     fun skipNext() { mediaController?.seekToNext() }
@@ -206,10 +221,20 @@ class MusicPlayerHandler @Inject constructor(
     fun seekTo(pos: Long){
         mediaController?.seekTo(pos)
     }
+    fun getCurrentMediaItemCount(): Int = mediaController?.mediaItemCount ?: 0
 
-    fun selectAndPlay(pos: Int){
-        mediaController?.seekTo(pos,0L)
-        mediaController?.prepare()
-        mediaController?.play()
+    fun jumpToSong(index: Int) {
+        mediaController?.let { controller ->
+            if (index in 0 until controller.mediaItemCount) {
+                controller.seekTo(index, 0L)
+                controller.play()
+            }
+        }
+    }
+
+    fun setGeneralPlaylist(songs: List<Song>) {
+        if (cachedGeneralMediaItems.isEmpty()) {
+            cachedGeneralMediaItems = createMediaItems(songs)
+        }
     }
 }

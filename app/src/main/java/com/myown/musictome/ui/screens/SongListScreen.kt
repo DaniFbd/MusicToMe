@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import com.myown.musictome.ui.components.SongItem
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
@@ -31,14 +33,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import com.myown.musictome.ui.components.BottomPlayerBar
 import com.myown.musictome.ui.components.SearchComponent
 import com.myown.musictome.R
+import com.myown.musictome.model.Song
+import com.myown.musictome.ui.components.AddToPlaylistDialog
+import com.myown.musictome.viewmodel.MusicViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongListScreen(
     viewModel: MusicViewModel = hiltViewModel(),
+    onNavigateToLists: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val songs by viewModel.filteredSongs.collectAsState()
@@ -51,6 +59,9 @@ fun SongListScreen(
     val progress = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
+    val playlists by viewModel.playlists.collectAsState()
+    var songToAssign by remember { mutableStateOf<Song?>(null) }
+    var idsWhereSongExists by remember { mutableStateOf<List<Long>>(emptyList()) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -61,6 +72,18 @@ fun SongListScreen(
         if (audioGranted) {
             viewModel.loadSongs()
         }
+    }
+
+    songToAssign?.let { song ->
+        AddToPlaylistDialog(
+            playlists = playlists,
+            onDismiss = { songToAssign = null },
+            onSelect = { playlist ->
+                viewModel.addSongToPlaylist(playlist.playlistId, song)
+                songToAssign = null
+            },
+            idsWhereSongExists
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -85,6 +108,14 @@ fun SongListScreen(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                actions = {
+                    IconButton(onClick =  onNavigateToLists) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = stringResource(R.string.my_lists_title)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -145,7 +176,16 @@ fun SongListScreen(
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
                         items(songs) { song ->
-                            SongItem(song = song, onClick = { viewModel.onSongClick(song) })
+                            SongItem(
+                                song = song,
+                                onClick = { viewModel.onSongClick(song) },
+                                onAddToPlaylist = {
+                                    viewModel.viewModelScope.launch {
+                                        idsWhereSongExists = viewModel.getListsForSong(song.id)
+                                        songToAssign = song
+                                    }
+                                }
+                            )
                         }
                     }
                 }
