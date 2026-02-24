@@ -25,7 +25,7 @@ fun AddToPlaylistDialog(
         title = { Text(stringResource(R.string.add_list_dialog_title)) },
         text = {
             if (playlists.isEmpty()) {
-                Text("No tienes listas creadas todavía.")
+                Text(stringResource(R.string.add_list_dialog_no_lists))
             } else {
                 LazyColumn {
                     items(playlists) { playlist ->

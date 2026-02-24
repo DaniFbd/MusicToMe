@@ -2,9 +2,9 @@ package com.myown.musictome.data
 
 import android.content.ContentUris
 import android.content.Context
-import android.net.Uri
 import android.provider.MediaStore
 import com.myown.musictome.model.Song
+import androidx.core.net.toUri
 
 class MusicLoader (private val context: Context) {
     fun fetchSongs(): List<Song> {
@@ -41,7 +41,7 @@ class MusicLoader (private val context: Context) {
                 val albumId = it.getLong(albumIdColumn)
 
                 val artUri = ContentUris.withAppendedId(
-                    Uri.parse("content://media/external/audio/albumart"),
+                    "content://media/external/audio/albumart".toUri(),
                     albumId
                 ).toString()
 
