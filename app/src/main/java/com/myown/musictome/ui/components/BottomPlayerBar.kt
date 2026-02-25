@@ -34,6 +34,7 @@ import com.myown.musictome.R
 
 @Composable
 fun BottomPlayerBar(
+    modifier: Modifier = Modifier,
     song: Song,
     progress: Float,
     isPlaying: Boolean,
@@ -42,7 +43,7 @@ fun BottomPlayerBar(
     onTogglePlay: () -> Unit,
     onClick: () -> Unit
 ) {
-    Column {
+    Column (modifier = modifier) {
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -135,6 +136,7 @@ fun SongListScreen(
         bottomBar = {
             currentSong?.let { song ->
                 BottomPlayerBar(
+                    modifier =Modifier.navigationBarsPadding(),
                     song = song,
                     progress = progress,
                     isPlaying = isPlaying,
