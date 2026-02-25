@@ -12,7 +12,7 @@
     <string name="btn_close">Tancar</string>
     <string name="search">Cerca</string>
     <string name="clean">Netejar</string>
-    <string name="search_placeholder">Buscar cançons o artistes...</string>
+    <string name="search_placeholder">Buscar cançons o artistes…</string>
     <!-- SongListScreen -->
     <string name="song_list_title">Llista de cançons</string>
     <string name="song_list_loading">Carregant la teva música</string>
