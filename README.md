@@ -65,4 +65,19 @@ La aplicación ha sido validada en configuraciones de seguridad avanzada:
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/dani-cano-nicolau-a33256277/)
 
 
-Si encuentras un error que no esté en esta lista, por favor abre un Issue en este repositorio. 
+Si encuentras un error que no esté en esta lista, por favor abre un Issue en este repositorio.
+<p align="center">
+<img width="200" src="https://github.com/user-attachments/assets/828941a5-3a37-4826-80dc-eb8d4e1d2aa5" />
+<img width="200" src="https://github.com/user-attachments/assets/9cc5e072-43d5-47aa-909c-de195a75460a" />
+<img width="200" src="https://github.com/user-attachments/assets/17576df0-47ba-4a61-94c6-ef66dbaa908a" />
+<img width="200" src="https://github.com/user-attachments/assets/90dbe69d-9c83-4b57-af72-4bcdcab9083e" />
+<img width="200" src="https://github.com/user-attachments/assets/2b261253-12c8-4d99-91e3-5df8bb0e6227" />
+<img width="200" src="https://github.com/user-attachments/assets/07c3787d-ac7d-41b2-84ac-4c0850a225cc" />
+<img width="200" src="https://github.com/user-attachments/assets/d0d0b9cd-9d63-46a8-981f-1b1c47951861" />
+<img width="200" src="https://github.com/user-attachments/assets/f3d9e3c7-38e3-4650-b9cd-d8c5eaf38376" />
+<img width="200" src="https://github.com/user-attachments/assets/9e1fecd3-133b-42b3-9927-7884fd2119ae" />
+<img width="200" src="https://github.com/user-attachments/assets/09c60b90-4239-4cf4-9af1-18ced441bc12" />
+<img width="200" src="https://github.com/user-attachments/assets/c03bc283-9dac-4fe7-a33c-5516cb1f9fb0" />
+<img width="200" src="https://github.com/user-attachments/assets/32e5f4b3-9b3c-4bb5-a681-ce2cdf2ac7b2" />
+</p>
+
