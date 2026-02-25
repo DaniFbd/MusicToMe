@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +40,7 @@ import com.myown.musictome.ui.components.SearchComponent
 import com.myown.musictome.R
 import com.myown.musictome.model.Song
 import com.myown.musictome.ui.components.AddToPlaylistDialog
+import com.myown.musictome.ui.components.ThemeSelectorDialog
 import com.myown.musictome.viewmodel.MusicViewModel
 import kotlinx.coroutines.launch
 
@@ -62,6 +64,7 @@ fun SongListScreen(
     val playlists by viewModel.playlists.collectAsState()
     var songToAssign by remember { mutableStateOf<Song?>(null) }
     var idsWhereSongExists by remember { mutableStateOf<List<Long>>(emptyList()) }
+    var showThemeDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -114,6 +117,12 @@ fun SongListScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.List,
                             contentDescription = stringResource(R.string.my_lists_title)
+                        )
+                    }
+
+                    IconButton(onClick = { showThemeDialog = true }) {
+                        Icon(imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings_change_aspect)
                         )
                     }
                 },
@@ -190,6 +199,16 @@ fun SongListScreen(
                     }
                 }
             }
+        }
+
+        if (showThemeDialog) {
+            ThemeSelectorDialog(
+                onDismiss = { showThemeDialog = false },
+                onThemeSelected = { selectedTheme ->
+                    viewModel.saveTheme(selectedTheme)
+                    showThemeDialog = false
+                }
+            )
         }
 
         if (showBottomSheet) {

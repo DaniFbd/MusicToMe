@@ -19,6 +19,15 @@ class MusicPreferences @Inject constructor(
     private val LAST_SONG_ID = stringPreferencesKey("last_song_id")
     private val SHUFFLE_ON = booleanPreferencesKey("shuffle_on")
     private val REPEAT_ON = booleanPreferencesKey("repeat_on")
+    private val THEME_KEY = stringPreferencesKey("theme_selection")
+
+    val themeSelection: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[THEME_KEY] ?: "SYSTEM"
+    }
+
+    suspend fun saveTheme(theme: String) {
+        context.dataStore.edit { it[THEME_KEY] = theme }
+    }
 
     suspend fun saveLastSong(songId: String) {
         context.dataStore.edit { it[LAST_SONG_ID] = songId }

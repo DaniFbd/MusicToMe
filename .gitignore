@@ -18,6 +18,7 @@ captures/
 .cxx/
 *.apk
 output.json
+/app/release/
 
 # IntelliJ
 *.iml
@@ -205,5 +206,4 @@ gradle-app.setting
 
 ### Gradle Patch ###
 # Java heap dump
-
 # End of https://www.toptal.com/developers/gitignore/api/intellij,android,gradle,kotlin
