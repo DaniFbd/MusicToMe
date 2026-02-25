@@ -59,6 +59,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    lint {
+        // Desactivamos el detector que está causando el crash interno
+        disable.add("NullSafeMutableLiveData")
+        checkReleaseBuilds = false
+    }
 }
 
 dependencies {

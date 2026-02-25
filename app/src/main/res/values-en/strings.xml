@@ -1,0 +1,46 @@
+<resources>
+    
+    
+    
+    <string name="btn_create">Create</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_save">Save</string>
+    <!-- SearchComponent -->
+    <string name="btn_close">Close</string>
+    <string name="search">Find</string>
+    <string name="clean">Clean</string>
+    <string name="search_placeholder">Search songs or artists...</string>
+    <!-- SongListScreen -->
+    <string name="song_list_title">Songs list</string>
+    <string name="song_list_loading">Loading music</string>
+    <string name="song_list_not_found">Music not found</string>
+    <!-- CurrentSongScreen -->
+    <string name="current_song_unknown">Unknown</string>
+    <string name="current_song_artist">Artist</string>
+    <!-- BottomPlayerBar -->
+    <string name="bottom_player_play_pause">Play/Pause</string>
+    <!-- SongItem -->
+    <string name="song_item_caratula">Cover %1$s</string>
+    <string name="song_item_to_list">To list…</string>
+    <string name="song_item_menu_description">Options</string>
+    <!-- AddToPlaylistDialog -->
+    <string name="add_list_dialog_title">Add to list</string>
+    <string name="add_list_dialog_no_lists">You don\'t have any lists created yet.</string>
+    <!-- MyListScreen -->
+    <string name="my_lists_title">My lists</string>
+    <string name="my_lists_create_dialog_title">Create list</string>
+    <string name="my_lists_create_dialog_placeholder">Name list</string>
+    <string name="my_lists_number_songs">%1$d songs</string>
+    <string name="my_lists_no_list">Don\'t have any lists. Click the + button to start!</string>
+    <string name="my_lists_edit_dialog_title">Change name list</string>
+    <string name="settings_change_aspect">Change aspect</string>
+    <string name="theme_system">Default / System</string>
+    <string name="theme_amoled">AMOLED (Battery Saving)</string>
+    <string name="theme_ocean">Ocean (Blues)</string>
+    <string name="theme_forest">Forest (Green)</string>
+    <string name="theme_retro">Amber (Yellows)</string>
+
+</resources>

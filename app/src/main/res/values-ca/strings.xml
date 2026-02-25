@@ -1,0 +1,46 @@
+<resources>
+    
+    
+    
+    <string name="btn_create">Crear</string>
+    <string name="btn_cancel">Cancel·la</string>
+    <string name="btn_back">Enrere</string>
+    <string name="btn_edit">Edita</string>
+    <string name="btn_delete">Eliminar</string>
+    <string name="btn_save">Desa</string>
+    <!-- SearchComponent -->
+    <string name="btn_close">Tancar</string>
+    <string name="search">Cerca</string>
+    <string name="clean">Netejar</string>
+    <string name="search_placeholder">Buscar cançons o artistes…</string>
+    <!-- SongListScreen -->
+    <string name="song_list_title">Llista de cançons</string>
+    <string name="song_list_loading">Carregant la teva música</string>
+    <string name="song_list_not_found">No es van trobar cançons.</string>
+    <!-- CurrentSongScreen -->
+    <string name="current_song_unknown">Desconegut</string>
+    <string name="current_song_artist">Artista</string>
+    <!-- BottomPlayerBar -->
+    <string name="bottom_player_play_pause">Reproduir/Pausar</string>
+    <!-- SongItem -->
+    <string name="song_item_caratula">Caràtula de %1$s</string>
+    <string name="song_item_to_list">Assignar a la llista…</string>
+    <string name="song_item_menu_description">Opcions de cançó</string>
+    <!-- AddToPlaylistDialog -->
+    <string name="add_list_dialog_title">Afegeix a una llista</string>
+    <string name="add_list_dialog_no_lists">Encara no tens llistes creades.</string>
+    <!-- MyListScreen -->
+    <string name="my_lists_title">Les meves llistes</string>
+    <string name="my_lists_create_dialog_title">Crear llista</string>
+    <string name="my_lists_create_dialog_placeholder">Nom llista</string>
+    <string name="my_lists_number_songs">%1$d cançons</string>
+    <string name="my_lists_no_list">No tens llistes creades. Clica el botó + per començar!</string>
+    <string name="my_lists_edit_dialog_title">Canviar nom a la llista</string>
+    <string name="settings_change_aspect">Canvi d\'aspecte</string>
+    <string name="theme_system">Predeterminat / Ssitema</string>
+    <string name="theme_amoled">Amoled (Estalvi bateria)</string>
+    <string name="theme_ocean">Ocea (Blaus)</string>
+    <string name="theme_forest">Bosc (Verds)</string>
+    <string name="theme_retro">Ambar (Grocs)</string>
+
+</resources>

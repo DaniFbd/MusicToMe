@@ -46,6 +46,7 @@ class MusicViewModel @Inject constructor(
     private var isPlayingFromCustomPlaylist = false
     private var lastClickTime = 0L
     private val _songs = mutableStateOf<List<Song>>(Collections.emptyList())
+    val themeSelection = musicPrefs.themeSelection
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
@@ -105,6 +106,12 @@ class MusicViewModel @Inject constructor(
 
         setupPlayerListeners()
         restoreLastSession()
+    }
+
+    fun saveTheme(theme: String) {
+        viewModelScope.launch(ioDispatcher) {
+            musicPrefs.saveTheme(theme)
+        }
     }
 
     private fun restoreLastSession(){
