@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.myown.musictome.model.Song
 import com.myown.musictome.R
+import com.myown.musictome.ui.theme.NeonGreen
 
 @Composable
 fun BottomPlayerBar(
@@ -43,6 +45,8 @@ fun BottomPlayerBar(
     onTogglePlay: () -> Unit,
     onClick: () -> Unit
 ) {
+    val isNeon = MaterialTheme.colorScheme.primary == NeonGreen
+
     Column (modifier = modifier) {
         LinearProgressIndicator(
             progress = { progress },
@@ -60,7 +64,7 @@ fun BottomPlayerBar(
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .clickable { onClick() },
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.primaryContainer,
+            color = if (isNeon) Color.Black else MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp
         ) {
             Row(
@@ -88,7 +92,8 @@ fun BottomPlayerBar(
                         text = song.title,
                         style = MaterialTheme.typography.bodyLarge,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = if (isNeon) NeonGreen else MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = song.artist,
@@ -105,7 +110,8 @@ fun BottomPlayerBar(
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = stringResource(R.string.bottom_player_play_pause),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
+                        tint = if (isNeon) NeonGreen else MaterialTheme.colorScheme.primary
                     )
                 }
 

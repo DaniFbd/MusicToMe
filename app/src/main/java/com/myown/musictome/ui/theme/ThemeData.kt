@@ -54,3 +54,21 @@ val RetroDarkColorScheme = darkColorScheme(
     surface = Color(0xFF242424),
     onBackground = Color(0xFFFFECB3)
 )
+
+// 5. Tema NEON un experimento de colores vivos
+val NeonColorScheme = darkColorScheme(
+    //Afecta a titulo de la cancion del BottomPlayerBar, boton play, shuffle, repeat del reproductor
+    //titulo de las listas, boton cancelar del dialog añadir a la lista, el color de fondo del checkbox
+    primary = NeonGreen,
+    secondary = NeonBlue,
+    background = DeepBlack,
+    surface = DeepBlack,
+    onPrimary = Color.Black,
+    //Afecta al color de los titulos y artistas de las canciones de la pantalla principal
+    onBackground = GasOrange,
+    //Afecta a los titulos de las canciones de la seccion Mis listas, titulo de la pantalla y flecha de atras.
+    //Ajustes y Nombre de la biblioteca, version que aparece en el menu, menu de las canciones cuando asignamos en listas
+    onSurface = DeepSeaNeon,
+    //Texto de buscar, menu, Ajustes -> texto, Pantalla listas, artista de la cancion
+    onSurfaceVariant = SoftPinkNeon,
+)

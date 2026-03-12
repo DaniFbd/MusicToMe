@@ -29,6 +29,9 @@
     <!-- AddToPlaylistDialog -->
     <string name="add_list_dialog_title">Añadir a una lista</string>
     <string name="add_list_dialog_no_lists">No tienes listas creadas todavía.</string>
+    <!-- EditTitleDialog -->
+    <string name="edit_title_dialog_title">Editar nombre de biblioteca</string>
+    <string name="edit_title_dialog_field">Nuevo nombre</string>
     <!-- MyListScreen -->
     <string name="my_lists_title">Mis listas</string>
     <string name="my_lists_create_dialog_title">Crear lista</string>
@@ -38,11 +41,14 @@
     <string name="my_lists_edit_dialog_title">Cambiar nombre a la lista</string>
     <!--Settings-->
     <string name="settings_change_aspect">Cambiar aspecto</string>
+    <string name="settings_music_folder">Seleccionar carpeta de música</string>
+    <string name="settings_title_change">Nombre de la biblioteca</string>
+    <string name="settings">Ajustes</string>
     <!--Theme presets-->
     <string name="theme_system">Predeterminado / Sistema</string>
     <string name="theme_amoled">Amoled (Ahorro bateria)</string>
     <string name="theme_ocean">Oceano (Azules)</string>
     <string name="theme_forest">Boque (Verdes)</string>
     <string name="theme_retro">Ambar (Amarillos)</string>
-
+    <string name="theme_neon">Neón (Experimental)</string>
 </resources>

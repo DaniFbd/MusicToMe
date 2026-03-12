@@ -21,6 +21,7 @@ fun ThemeSelectorDialog(
                 ThemeOption(stringResource(R.string.theme_ocean), "OCEAN", onThemeSelected)
                 ThemeOption(stringResource(R.string.theme_forest), "FOREST", onThemeSelected)
                 ThemeOption(stringResource(R.string.theme_retro), "RETRO", onThemeSelected)
+                ThemeOption(stringResource(R.string.theme_neon), "NEON", onThemeSelected)
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_close)) } }

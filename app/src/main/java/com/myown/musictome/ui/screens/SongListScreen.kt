@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,15 +45,18 @@ import com.myown.musictome.R
 import com.myown.musictome.model.Song
 import com.myown.musictome.ui.components.AddToPlaylistDialog
 import com.myown.musictome.ui.components.ThemeSelectorDialog
+import com.myown.musictome.ui.theme.NeonGreen
+import com.myown.musictome.ui.theme.neonGradient
 import com.myown.musictome.viewmodel.MusicViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongListScreen(
+    modifier: Modifier = Modifier,
     viewModel: MusicViewModel = hiltViewModel(),
     onNavigateToLists: () -> Unit,
-    modifier: Modifier = Modifier
+    onOpenSettings: () -> Unit
 ) {
     val songs by viewModel.filteredSongs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
@@ -65,16 +71,21 @@ fun SongListScreen(
     val playlists by viewModel.playlists.collectAsState()
     var songToAssign by remember { mutableStateOf<Song?>(null) }
     var idsWhereSongExists by remember { mutableStateOf<List<Long>>(emptyList()) }
-    var showThemeDialog by remember { mutableStateOf(false) }
+    val selectedIds by viewModel.selectedSongIds.collectAsState()
+    val isInSelectionMode by viewModel.isSelectionMode.collectAsState()
+    var showMultiSelectDialog by remember { mutableStateOf(false) }
+    val libraryTitle by viewModel.libraryTitle.collectAsState()
+    val isNeon = MaterialTheme.colorScheme.primary == NeonGreen
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val audioGranted = permissions[Manifest.permission.READ_MEDIA_AUDIO] ?: false
-        val notificationGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+        //pedimos los permisos
+        val permission = permissions[Manifest.permission.READ_MEDIA_AUDIO] ?: false
+        permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
 
-        if (audioGranted) {
-            viewModel.loadSongs()
+        if (permission) {
+            viewModel.retryLoad()
         }
     }
 
@@ -107,24 +118,46 @@ fun SongListScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        stringResource(R.string.song_list_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                actions = {
-                    IconButton(onClick =  onNavigateToLists) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = stringResource(R.string.my_lists_title)
+                    if (isInSelectionMode) {
+                        Text("${selectedIds.size} seleccionadas")
+                    } else {
+                        Text(text= libraryTitle,
+                            style = if (isNeon) {
+                                MaterialTheme.typography.titleLarge.copy(
+                                    brush = neonGradient()
+                                )
+                            } else {
+                                MaterialTheme.typography.titleLarge
+                            },
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                },
+                navigationIcon = {
+                    if (isInSelectionMode) {
+                        IconButton(onClick = { viewModel.clearSelection() }) {
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.btn_cancel))
+                        }
+                    }
+                },
+                actions = {
+                    if (isInSelectionMode) {
+                        IconButton(onClick = { showMultiSelectDialog = true }) {
+                            Icon(Icons.AutoMirrored.Filled.PlaylistAdd, contentDescription = stringResource(R.string.add_list_dialog_title))
+                        }
+                    } else {
+                        IconButton(onClick =  onNavigateToLists) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.List,
+                                contentDescription = stringResource(R.string.my_lists_title)
+                            )
+                        }
 
-                    IconButton(onClick = { showThemeDialog = true }) {
-                        Icon(imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.settings_change_aspect)
-                        )
+                        IconButton(onClick = onOpenSettings ) {
+                            Icon(imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.settings)
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -190,6 +223,9 @@ fun SongListScreen(
                             SongItem(
                                 song = song,
                                 onClick = { viewModel.onSongClick(song) },
+                                isSelectionMode = isInSelectionMode,
+                                isSelected = selectedIds.contains(song.id),
+                                onSelect = { viewModel.toggleSelection(song.id) },
                                 onAddToPlaylist = {
                                     viewModel.viewModelScope.launch {
                                         idsWhereSongExists = viewModel.getListsForSong(song.id)
@@ -203,13 +239,15 @@ fun SongListScreen(
             }
         }
 
-        if (showThemeDialog) {
-            ThemeSelectorDialog(
-                onDismiss = { showThemeDialog = false },
-                onThemeSelected = { selectedTheme ->
-                    viewModel.saveTheme(selectedTheme)
-                    showThemeDialog = false
-                }
+        if (showMultiSelectDialog) {
+            AddToPlaylistDialog(
+                playlists = playlists,
+                onDismiss = { showMultiSelectDialog = false },
+                onSelect = { playlistId ->
+                    viewModel.addSelectedToPlaylist(playlistId.playlistId)
+                    showMultiSelectDialog = false
+                },
+                idsWhereSongExists
             )
         }
 

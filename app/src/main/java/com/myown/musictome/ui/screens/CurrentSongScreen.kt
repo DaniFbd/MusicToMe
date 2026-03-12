@@ -1,5 +1,6 @@
 package com.myown.musictome.ui.screens
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,14 +28,20 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.myown.musictome.R
 import com.myown.musictome.formatTime
+import com.myown.musictome.ui.theme.NeonBlue
+import com.myown.musictome.ui.theme.NeonGreen
+import com.myown.musictome.ui.theme.neonGradient
 import com.myown.musictome.viewmodel.MusicViewModel
 
 @Composable
@@ -45,6 +52,7 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
     val isRepeat by viewModel.isRepeatAllEnabled
     val position by viewModel.currentPosition
     val duration by viewModel.totalDuration
+    val isNeon = MaterialTheme.colorScheme.primary == NeonGreen
 
     val sliderPosition = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
 
@@ -66,7 +74,11 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
             contentDescription = null,
             modifier = Modifier
                 .size(300.dp)
-                .clip(RoundedCornerShape(24.dp)),
+                .clip(RoundedCornerShape(24.dp))
+                .then(
+                    if (isNeon) Modifier.border(4.dp, Brush.linearGradient(listOf(NeonBlue.copy(alpha=0.5f), Color.Black)), RoundedCornerShape(16.dp))
+                    else Modifier
+                ),
             placeholder = painterResource(R.drawable.default_album_art),
             error = painterResource(R.drawable.default_album_art),
             fallback = painterResource(R.drawable.default_album_art),
@@ -75,7 +87,15 @@ fun CurrentSongScreen(viewModel: MusicViewModel, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        Text(text = song?.title ?: stringResource(R.string.current_song_unknown), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(text = song?.title ?: stringResource(R.string.current_song_unknown),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            minLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+            )
         Text(text = song?.artist ?: stringResource(R.string.current_song_artist), style = MaterialTheme.typography.titleMedium, color = Color.Gray)
 
         Spacer(modifier = Modifier.height(30.dp))
