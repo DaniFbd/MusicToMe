@@ -30,6 +30,8 @@
     <string name="add_list_dialog_title">Add to list</string>
     <string name="add_list_dialog_no_lists">You don\'t have any lists created yet.</string>
     <!-- MyListScreen -->
+    <string name="edit_title_dialog_title">Change library name</string>
+    <string name="edit_title_dialog_field">New name</string>
     <string name="my_lists_title">My lists</string>
     <string name="my_lists_create_dialog_title">Create list</string>
     <string name="my_lists_create_dialog_placeholder">Name list</string>
@@ -37,10 +39,14 @@
     <string name="my_lists_no_list">Don\'t have any lists. Click the + button to start!</string>
     <string name="my_lists_edit_dialog_title">Change name list</string>
     <string name="settings_change_aspect">Change aspect</string>
+    <string name="settings">Settings</string>
     <string name="theme_system">Default / System</string>
     <string name="theme_amoled">AMOLED (Battery Saving)</string>
     <string name="theme_ocean">Ocean (Blues)</string>
     <string name="theme_forest">Forest (Green)</string>
     <string name="theme_retro">Amber (Yellows)</string>
+    <string name="settings_music_folder">Select music folder</string>
+    <string name="settings_title_change">Library name</string>
+    <string name="theme_neon">Neon (Experimental)</string>
 
 </resources>

@@ -30,6 +30,7 @@
     <string name="add_list_dialog_title">Afegeix a una llista</string>
     <string name="add_list_dialog_no_lists">Encara no tens llistes creades.</string>
     <!-- MyListScreen -->
+    <string name="edit_title_dialog_field">Nou nom</string>
     <string name="my_lists_title">Les meves llistes</string>
     <string name="my_lists_create_dialog_title">Crear llista</string>
     <string name="my_lists_create_dialog_placeholder">Nom llista</string>
@@ -37,10 +38,15 @@
     <string name="my_lists_no_list">No tens llistes creades. Clica el botó + per començar!</string>
     <string name="my_lists_edit_dialog_title">Canviar nom a la llista</string>
     <string name="settings_change_aspect">Canvi d\'aspecte</string>
+    <string name="settings">Configuracions</string>
     <string name="theme_system">Predeterminat / Ssitema</string>
     <string name="theme_amoled">Amoled (Estalvi bateria)</string>
     <string name="theme_ocean">Ocea (Blaus)</string>
     <string name="theme_forest">Bosc (Verds)</string>
     <string name="theme_retro">Ambar (Grocs)</string>
+    <string name="edit_title_dialog_title">Edita el nom de la biblioteca</string>
+    <string name="settings_music_folder">Seleccionar carpeta de música</string>
+    <string name="settings_title_change">Nom de la biblioteca</string>
+    <string name="theme_neon">Neó (Experimental)</string>
 
 </resources>
