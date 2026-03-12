@@ -2,12 +2,14 @@ package com.myown.musictome.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Delete
@@ -22,11 +24,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.myown.musictome.R
 import com.myown.musictome.data.local.PlaylistEntity
+import com.myown.musictome.ui.theme.NeonBlue
+import com.myown.musictome.ui.theme.NeonGreen
+import com.myown.musictome.ui.theme.neonGradient
 import com.myown.musictome.viewmodel.MusicViewModel
 import kotlin.collections.emptyList
 
@@ -41,10 +47,24 @@ fun PlaylistExpandableItem(
     val songsInPlaylist by viewModel.getSongsInPlaylist(playlist.playlistId)
         .collectAsState(initial = emptyList())
     var showMenu by remember { mutableStateOf(false) }
+    val isNeon = MaterialTheme.colorScheme.primary == NeonGreen
 
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .then(
+                if (isNeon) Modifier.border(1.dp, neonGradient(), RoundedCornerShape(12.dp))
+                else Modifier
+            )
+    ) {
         Box {
             ListItem(
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                    headlineColor = if (isNeon) NeonGreen else MaterialTheme.colorScheme.onSurface,
+                    leadingIconColor = if (isNeon) NeonBlue else MaterialTheme.colorScheme.primary,
+                    trailingIconColor = if (isNeon) NeonBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 headlineContent = { Text(playlist.name, fontWeight = FontWeight.Bold) },
                 supportingContent = { Text(stringResource(R.string.my_lists_number_songs, songsInPlaylist.size)) },
                 leadingContent = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },

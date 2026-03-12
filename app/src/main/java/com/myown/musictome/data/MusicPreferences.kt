@@ -1,6 +1,7 @@
 package com.myown.musictome.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +21,26 @@ class MusicPreferences @Inject constructor(
     private val SHUFFLE_ON = booleanPreferencesKey("shuffle_on")
     private val REPEAT_ON = booleanPreferencesKey("repeat_on")
     private val THEME_KEY = stringPreferencesKey("theme_selection")
+    private val MUSIC_FOLDER_URI = stringPreferencesKey("music_folder_uri")
+    private val LIBRARY_TITLE = stringPreferencesKey("library_title")
+
+    suspend fun saveLibraryTitle(title: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LIBRARY_TITLE] = title
+        }
+    }
+
+    val libraryTitle: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[LIBRARY_TITLE] ?: "MusicToMe"
+    }
+
+    suspend fun saveMusicFolder(uri: String) {
+        context.dataStore.edit { preferences ->
+            Log.d("DataStore", "Emitiendo: $uri")
+            preferences[MUSIC_FOLDER_URI] = uri
+        }
+    }
+    val musicFolderUri: Flow<String?> = context.dataStore.data.map { it[MUSIC_FOLDER_URI] }
 
     val themeSelection: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[THEME_KEY] ?: "SYSTEM"

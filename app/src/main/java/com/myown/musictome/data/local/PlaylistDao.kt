@@ -18,12 +18,17 @@ interface PlaylistDao {
     suspend fun deletePlaylist(playlist: PlaylistEntity)
 
     //operaciones de canciones y relaciones
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSongMetadata(song: SongMetadataEntity)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertSongsMetadata(song: List<SongMetadataEntity>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addSongToPlaylist(crossRef: PlaylistSongCrossRef)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSongsToPlaylist(crossRefs: List<PlaylistSongCrossRef>)
 
     @Query("DELETE FROM playlist_song_cross_ref WHERE playlistId = :playlistId AND mediaId = :mediaId")
     suspend fun removeSongFromPlaylist(playlistId: Long, mediaId: String)

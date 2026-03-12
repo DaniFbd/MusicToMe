@@ -1,11 +1,15 @@
 package com.myown.musictome.viewmodel
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.myown.musictome.data.MusicLoader
 import com.myown.musictome.data.MusicPreferences
@@ -19,13 +23,18 @@ import com.myown.musictome.model.Song
 import com.myown.musictome.player.MusicPlayerHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -90,6 +99,29 @@ class MusicViewModel @Inject constructor(
     val playlists = playlistDao.getAllPlaylists()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val selectedFolder = musicPrefs.musicFolderUri
+
+    //multiselect canciones
+    private val _selectedSongIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedSongIds = _selectedSongIds.asStateFlow()
+
+    //comprobar si estamos en el modo seleccion
+    val isSelectionMode = _selectedSongIds.map { it.isNotEmpty() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val libraryTitle: StateFlow<String> = musicPrefs.libraryTitle
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = "MusicToMe"
+        )
+
+    fun updateLibraryTitle(newTitle: String) {
+        viewModelScope.launch(ioDispatcher) {
+            val sanitizedTitle = if (newTitle.length > 50) newTitle.take(50) else newTitle
+            musicPrefs.saveLibraryTitle(sanitizedTitle)
+        }
+    }
     init {
         viewModelScope.launch {
             launch { playerHandler.isPlaying.collect { playing ->
@@ -102,10 +134,73 @@ class MusicViewModel @Inject constructor(
             } }
             launch { playerHandler.shuffleEnabled.collect { _isShuffleEnabled.value = it } }
             launch { playerHandler.repeatEnabled.collect { _isRepeatAllEnabled.value = it } }
+
+            //solo se dispara cuando el valor ha cambiado, si es la misma carpeta que ya teniamos no se lanza
+            selectedFolder.distinctUntilChanged().collect {folderUri ->
+                loadSongs(folderUri)}
         }
 
         setupPlayerListeners()
         restoreLastSession()
+    }
+
+    fun toggleSelection(songId: String) {
+        val current = _selectedSongIds.value
+        if (current.contains(songId)) {
+            _selectedSongIds.value = current - songId
+        } else {
+            _selectedSongIds.value = current + songId
+        }
+    }
+
+    fun clearSelection() {
+        _selectedSongIds.value = emptySet()
+    }
+
+    //añadir todas las seleccionadas a una lista
+    fun addSelectedToPlaylist(playlistId: Long) {
+        viewModelScope.launch(ioDispatcher) {
+            val selectedIds = _selectedSongIds.value
+            val songsToSave = _songs.value.filter { selectedIds.contains(it.id) }
+            val entities = songsToSave.map { song ->
+                SongMetadataEntity(
+                    mediaId = song.id,
+                    title = song.title,
+                    artist = song.artist,
+                    duration = song.duration,
+                    artUri = song.imageUrl
+                )
+            }
+
+            playlistDao.insertSongsMetadata(entities)
+
+            val crossRefs = selectedIds.map { id ->
+                PlaylistSongCrossRef(playlistId = playlistId, mediaId = id)
+            }
+
+            playlistDao.insertSongsToPlaylist(crossRefs)
+
+            withContext(mainDispatcher) {
+                clearSelection()
+            }
+        }
+    }
+
+    fun updateMusicFolder(folderUri: String) {
+        //el uri viene codificado, lo arreglamos
+        val decodedUri = Uri.decode(folderUri)
+
+        // Extraemos la ruta después del ":"
+        val folderPath = if (decodedUri.contains(":")) {
+            decodedUri.split(":").last() + "/"
+        } else {
+            decodedUri
+        }
+
+        //diractamente guardamos en las prefs, esto dispara el collect del init.
+        viewModelScope.launch(ioDispatcher) {
+            musicPrefs.saveMusicFolder(folderPath)
+        }
     }
 
     fun saveTheme(theme: String) {
@@ -240,11 +335,26 @@ class MusicViewModel @Inject constructor(
         _searchQuery.value = newQuery
     }
 
-    fun loadSongs() {
+    fun retryLoad() {
+        viewModelScope.launch {
+            val currentFolder = musicPrefs.musicFolderUri.first()
+            loadSongs(currentFolder)
+        }
+    }
+
+    private var lastFolderLoaded: String? = "INITIAL_VALUE"
+    fun loadSongs(folderPath: String? = null) {
+        //evitamos cargar continuamente al girar la pantalla
+        if (_songs.value.isNotEmpty() && lastFolderLoaded == folderPath) {
+            return
+        }
+
         viewModelScope.launch(ioDispatcher) {
             _isLoading.value = true
             val loader = MusicLoader(context)
-            val fetchedSongs = loader.fetchSongs()
+            val fetchedSongs = loader.fetchSongs(folderPath)
+
+            lastFolderLoaded = folderPath
 
             if (fetchedSongs.isNotEmpty()) {
                 playerHandler.setGeneralPlaylist(fetchedSongs)

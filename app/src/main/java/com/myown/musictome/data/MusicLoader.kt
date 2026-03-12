@@ -7,7 +7,10 @@ import com.myown.musictome.model.Song
 import androidx.core.net.toUri
 
 class MusicLoader (private val context: Context) {
-    fun fetchSongs(): List<Song> {
+    fun fetchSongs(folderPath: String? = null): List<Song> {
+        var selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+        var selectionArgs: Array<String>? = null
+
         val songList = mutableListOf<Song>()
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
@@ -17,11 +20,16 @@ class MusicLoader (private val context: Context) {
             MediaStore.Audio.Media.ALBUM_ID
         )
 
+        if (!folderPath.isNullOrEmpty()) {
+            selection += " AND ${MediaStore.Audio.Media.RELATIVE_PATH} LIKE ?"
+            selectionArgs = arrayOf("%$folderPath%")
+        }
+
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
-            "${MediaStore.Audio.Media.IS_MUSIC} != 0",
-            null,
+            selection,
+            selectionArgs,
             "${MediaStore.Audio.Media.TITLE} ASC"
         )
 

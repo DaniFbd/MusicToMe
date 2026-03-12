@@ -25,6 +25,7 @@ fun MusicToMeTheme(
         "OCEAN" -> OceanDarkColorScheme
         "FOREST" -> ForestDarkColorScheme
         "RETRO" -> RetroDarkColorScheme
+        "NEON" -> NeonColorScheme
         "SYSTEM" -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val context = LocalContext.current
