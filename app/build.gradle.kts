@@ -10,13 +10,13 @@ plugins {
 android {
     namespace = "com.myown.musictome"
     //noinspection GradleDependency
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.myown.musictome"
         minSdk = 24
         //noinspection OldTargetApi,EditedTargetSdkVersion
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 2
         versionName = "1.1.1"
 
@@ -64,6 +64,18 @@ android {
         // Desactivamos el detector que está causando el crash interno
         disable.add("NullSafeMutableLiveData")
         checkReleaseBuilds = false
+    }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+            //obtenemos la version
+            val versionName = variant.versionName
+            //formateamos el nombre
+            val newName = "MusicToMe_v${versionName}_${variant.buildType.name}.apk"
+            output.outputFileName = newName
+        }
     }
 }
 
